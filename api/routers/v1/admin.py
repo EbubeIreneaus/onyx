@@ -12,6 +12,8 @@ from models.admin import Tier as TierModel
 from schemas.admin import TierCreate, TierUpdate, TierResponse
 from schemas.user import UserOut
 from libs.deps import get_admin
+from workers.config import get_arq_pool
+from libs.logger import logger
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
@@ -52,6 +54,14 @@ async def create_tier(
     db.add(new_tier)
     await db.commit()
     await db.refresh(new_tier)
+
+    if int(new_tier.price) > 0:
+        try:
+            arq = await get_arq_pool()
+            await arq.enqueue_job("sync_paystack_plan_task", str(new_tier.tier_id), _queue_name="onyx")
+        except Exception as err:
+            logger.warning(f"Failed to enqueue sync_paystack_plan_task for new tier {new_tier.tier_id - new_tier.name}: {err}")
+
     return new_tier
 
 
@@ -124,6 +134,13 @@ async def update_tier(
 
     await db.commit()
     await db.refresh(tier)
+
+    try:
+        arq = await get_arq_pool()
+        await arq.enqueue_job("sync_paystack_plan_task", str(tier.tier_id), _queue_name="onyx")
+    except Exception as err:
+        logger.warning(f"Failed to enqueue sync_paystack_plan_task for tier {tier.tier_id}: {err}")
+
     return tier
 
 

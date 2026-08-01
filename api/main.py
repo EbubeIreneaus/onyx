@@ -16,6 +16,8 @@ from setting import settings
 from routers.v1.auth import router as auth_router
 from routers.v1.client import router as client_router
 from routers.v1.admin import router as admin_router
+from routers.v1.payment import router as payment_router
+from libs.logger import logger
 
 app = FastAPI(title="Onyx Link Managent & Web Tracking")
 
@@ -33,6 +35,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(client_router, prefix="/api/v1")
 app.include_router(admin_router, prefix="/api/v1")
+app.include_router(payment_router, prefix="/api/v1")
 
 # app.include_router(auth_router, prefix="", include_in_schema=False)
 # app.include_router(client_router, prefix="", include_in_schema=False)
@@ -83,13 +86,18 @@ async def execute_resolve(
 
     client_ip = x_forwarded_for.split(',')[0].strip() if x_forwarded_for else (request.client.host if request.client else "127.0.0.1")
 
-    visitor = RedirectVisitorModel(
-        redirect_id=redirect_obj.redirect_id,
-        ip=client_ip,
-        device=user_agent,
-    )
-    db.add(visitor)
-    await db.commit()
+    try:
+        from workers.config import get_arq_pool
+        arq = await get_arq_pool()
+        await arq.enqueue_job(
+            "log_redirect_visitor_task",
+            str(redirect_obj.redirect_id),
+            client_ip,
+            user_agent or "",
+            _queue_name="onyx"
+        )
+    except Exception as err:
+        logger.warning(f"Failed to enqueue visitor tracking worker job for redirect {redirect_obj.redirect_id}: {err}")
 
     return {
         "destination": redirect_obj.destination,

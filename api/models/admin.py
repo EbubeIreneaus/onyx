@@ -17,6 +17,7 @@ class Tier(Base):
     description: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     price: Mapped[float] = mapped_column(Numeric(10, 2))
     permissions: Mapped[List[AppPermission]] = mapped_column(JSON)
+    paystack_plan_code: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     max_short_link: Mapped[str] = mapped_column(String(50))
     link_durability: Mapped[Optional[str]] = mapped_column(String(50), default="14") #in days
     max_custom_domains: Mapped[str] = mapped_column(String(50), default="0")

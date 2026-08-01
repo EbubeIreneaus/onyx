@@ -2,6 +2,8 @@ from arq.connections import RedisSettings
 from arq.worker import create_pool
 from setting import settings
 from .auth import update_session, send_welcome_email
+from .paystack import create_paystack_customer_task, sync_paystack_plan_task, process_paystack_webhook_task
+from .redirect import log_redirect_visitor_task
 
 REDIS_SETTING = RedisSettings.from_dsn(settings.REDIS_URL)
 
@@ -10,6 +12,13 @@ async def get_arq_pool():
     return pool
 
 class WorkerSettings:
-    functions = [update_session, send_welcome_email]
+    functions = [
+        update_session,
+        send_welcome_email,
+        create_paystack_customer_task,
+        sync_paystack_plan_task,
+        process_paystack_webhook_task,
+        log_redirect_visitor_task,
+    ]
     redis_settings = REDIS_SETTING
     queue_name = "onyx"

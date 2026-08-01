@@ -11,6 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from datetime import datetime, timezone
 from .redis import redis
+from libs.logger import logger
 
 oauth2 = OAuth2PasswordBearer(tokenUrl="/auth/signin", auto_error=False)
 
@@ -40,7 +41,7 @@ async def get_user(
     session_data = None
     now = datetime.now(timezone.utc)
 
-    if not session_raw:
+    if session_raw:
         session_data = SessionUserSchema.model_validate_json(session_raw)
     else:
         s = await db.scalar(
@@ -66,8 +67,8 @@ async def get_user(
             seconds_left = int(time_left.total_seconds())
             if seconds_left > 0:
                 await redis.set(f"onyx:session:{session_id}", json_session, ex=seconds_left)
-        except Exception:
-            pass
+        except Exception as err:
+            logger.warning(f"Failed to cache session in Redis: {err}")
 
     user = session_data.user
 

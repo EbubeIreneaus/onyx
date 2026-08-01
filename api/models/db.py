@@ -2,6 +2,7 @@ from sqlalchemy import exc
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 from setting import settings
+from libs.logger import logger
 
 engine = create_async_engine(
     settings.DB_URL,
@@ -11,7 +12,6 @@ engine = create_async_engine(
 SessionLocal = async_sessionmaker(
     engine, 
     expire_on_commit=False,
-
 )
 
 class Base(DeclarativeBase):
@@ -23,6 +23,7 @@ async def get_db():
             yield session
         except exc.SQLAlchemyError as e:
             await session.rollback()
+            logger.exception(f"Database error during request session: {e}")
             raise e
         finally:
             await session.close()

@@ -8,6 +8,7 @@ from models.db import SessionLocal
 from models.user import Session as AuthSession
 from libs.mail import conf
 from setting import settings
+from libs.logger import logger
 
 async def update_session(ctx, session_id, user_agent_string):
     async with SessionLocal() as db:
@@ -31,13 +32,14 @@ async def update_session(ctx, session_id, user_agent_string):
                         if r.get("status") == "success":
                             location = f"{r.get('city', '')}, {r.get('country', '')}. {r.get('zip', '')}"
                             session.location = location
-                    except Exception:
-                        pass
+                    except Exception as err:
+                        logger.warning(f"Failed to fetch IP geolocation for {ip}: {err}")
 
             await db.commit()
             return True
         except Exception as e:
             await db.rollback()
+            logger.exception(f"Error updating session {session_id}: {e}")
             raise e
 
 async def send_welcome_email(ctx, email, fullname):
@@ -50,6 +52,8 @@ async def send_welcome_email(ctx, email, fullname):
         )
         fm = FastMail(conf)
         await fm.send_message(message, template_name="welcome.html")
+        logger.info(f"Welcome email sent successfully to {email}")
         return True
     except Exception as e:
+        logger.exception(f"Error sending welcome email to {email}: {e}")
         raise e

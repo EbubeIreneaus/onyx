@@ -81,7 +81,7 @@ class UserOut(BaseModel):
 class UserManage(UserOut):
     model_config = ConfigDict(from_attributes=True)
     is_admin: bool
-    admin_priviledges: List[AdminPermission]
+    admin_priviledges: Optional[List[AdminPermission]] = None
 
 class SessionUserSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)

@@ -29,6 +29,7 @@ from libs.redis import redis
 from libs.limiter import limiter
 from setting import settings
 from workers.config import get_arq_pool
+from libs.logger import logger
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -117,15 +118,15 @@ async def signup(
     try:
         session_data = SessionUserSchema.model_validate(new_session).model_dump_json()
         await redis.set(f"onyx:session:{new_session.session_id}", session_data, ex=ACCESS_TOKEN_EXP)
-    except Exception:
-        pass
+    except Exception as err:
+        logger.warning(f"Failed to cache session in Redis for user {email}: {err}")
 
     try:
         arq = await get_arq_pool()
         await arq.enqueue_job("update_session", str(new_session.session_id), user_agent, _queue_name="onyx")
         await arq.enqueue_job("send_welcome_email", email, body.fullname, _queue_name="onyx")
-    except Exception:
-        pass
+    except Exception as err:
+        logger.warning(f"Failed to enqueue signup background jobs for user {email}: {err}")
 
     return {"success": True, "token": token, "refresh_token": refresh_token}
 
@@ -211,14 +212,14 @@ async def signin(
     try:
         session_data = SessionUserSchema.model_validate(session).model_dump_json()
         await redis.set(f"onyx:session:{session.session_id}", session_data, ex=ACCESS_TOKEN_EXP)
-    except Exception:
-        pass
+    except Exception as err:
+        logger.warning(f"Failed to cache session in Redis for user {email}: {err}")
 
     try:
         arq = await get_arq_pool()
         await arq.enqueue_job("update_session", str(session.session_id), user_agent, _queue_name="onyx")
-    except Exception:
-        pass
+    except Exception as err:
+        logger.warning(f"Failed to enqueue update_session background job: {err}")
 
     return {"success": True, "token": token, "refresh_token": refresh_token}
 
@@ -296,8 +297,8 @@ async def refresh_token(
     try:
         session_data = SessionUserSchema.model_validate(session).model_dump_json()
         await redis.set(f"onyx:session:{session.session_id}", session_data, ex=ACCESS_TOKEN_EXP)
-    except Exception:
-        pass
+    except Exception as err:
+        logger.warning(f"Failed to update session in Redis on refresh: {err}")
 
     return {"success": True, "token": token, "refresh_token": new_refresh_token}
 
@@ -318,8 +319,8 @@ async def signout(
                 await redis.delete(f"onyx:session:{session.session_id}")
                 await db.delete(session)
                 await db.commit()
-        except Exception:
-            pass
+        except Exception as err:
+            logger.warning(f"Error during signout session deletion: {err}")
 
     response.delete_cookie("access_token", path="/")
     response.delete_cookie("refresh_token", path="/")

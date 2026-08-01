@@ -51,3 +51,4 @@ class TierResponse(BaseModel):
 
 class SubscribeIn(BaseModel):
     tier_id: uuid.UUID
+    callback_url: Optional[str] = None
