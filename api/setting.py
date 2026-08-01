@@ -1,12 +1,16 @@
+from dns.edns import COOKIE
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     DB_URL: str
     JWT_SECRET: str
     JWT_ALGORITHM: str
-
+    APP_ENV: str = "development"
     MIN_ALLOWED_SHORT_LINKS: int = 5 #Minimum short link any tier user could create
     DOMAIN_NAME: str = "onyx.com"
+    
+    PAYSTACK_SECRET: str
+    PAYSTACK_PUBLIC: str
 
     REDIS_URL: str
 

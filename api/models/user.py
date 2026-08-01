@@ -1,3 +1,6 @@
+from sqlalchemy import Nullable
+from sqlalchemy import JSON
+from permission import AdminPermission
 from typing import TYPE_CHECKING
 from schemas.user import SUBSCRIPTION_STATUS
 from schemas.user import USER_STATUS
@@ -27,6 +30,8 @@ class User(Base):
     fullname: Mapped[str] = mapped_column(String(50))
     email: Mapped[EmailStr] = mapped_column(String(50), unique=True, index=True)
     password: Mapped[str] = mapped_column(String(100))
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=True)
+    admin_priviledges: Mapped[List[AdminPermission]] = mapped_column(JSON)
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False)
     status: Mapped[USER_STATUS] = mapped_column(Enum(USER_STATUS), default=USER_STATUS.ACTIVE)
     current_sub_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID, ForeignKey("subscriptions.sub_id"), nullable=True)

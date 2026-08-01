@@ -1,5 +1,11 @@
-from pydantic import BaseModel, EmailStr
+from permission import AdminPermission
+from pydantic import BaseModel, EmailStr, ConfigDict
 from enum import Enum
+from typing import Optional, List
+from datetime import datetime
+import uuid
+from decimal import Decimal
+from permission import AppPermission
 
 class SUBSCRIPTION_TIER(str, Enum):
     FREE = "free"
@@ -26,3 +32,61 @@ class BaseUser(BaseModel):
 
 class UserCreate(BaseUser):
     password: str
+
+class LoginSchema(BaseModel):
+    email: EmailStr
+    password: str
+
+class ChangePassIn(BaseModel):
+    current: str
+    new_password: str
+
+class ResetLinkIn(BaseModel):
+    email: EmailStr
+
+class ResetPassIn(BaseModel):
+    token: str
+    new_password: str
+
+class TierOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    tier_id: uuid.UUID
+    name: str
+    price: Decimal
+    permissions: List[AppPermission]
+    max_short_link: int
+    is_active: bool
+
+class SubscriptionOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    sub_id: uuid.UUID
+    amount: Decimal
+    status: SUBSCRIPTION_STATUS
+    tier_id: uuid.UUID
+    tier: Optional[TierOut] = None
+    created_at: datetime
+    expired_at: datetime
+
+class UserOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    user_id: uuid.UUID
+    fullname: str
+    email: EmailStr
+    status: USER_STATUS
+    email_verified: bool
+    created_at: datetime
+    current_subscription: Optional[SubscriptionOut] = None
+
+class UserManage(UserOut):
+    model_config = ConfigDict(from_attributes=True)
+    is_admin: bool
+    admin_priviledges: List[AdminPermission]
+
+class SessionUserSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    session_id: uuid.UUID
+    user_id: uuid.UUID
+    user: UserManage
+    expires_at: datetime

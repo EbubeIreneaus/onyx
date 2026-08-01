@@ -5,7 +5,7 @@ from setting import settings
 
 engine = create_async_engine(
     settings.DB_URL,
-    echo=True,
+    echo=False,
 )
 
 SessionLocal = async_sessionmaker(
