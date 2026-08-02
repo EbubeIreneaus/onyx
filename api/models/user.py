@@ -41,6 +41,8 @@ class User(Base):
     redirects: Mapped[List['Redirect']] = relationship(back_populates="user", cascade="all, delete-orphan")
     domains: Mapped[List['Domain']] = relationship(back_populates="user", cascade="all, delete-orphan")    
     sessions: Mapped[List['Session']] = relationship(back_populates="user", cascade="all, delete-orphan")
+    api_key: Mapped[Optional[str]] = mapped_column(String(255), unique=True, index=True, nullable=True)
+    api_key_created_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
     deleted_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 

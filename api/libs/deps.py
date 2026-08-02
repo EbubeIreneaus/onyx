@@ -13,19 +13,62 @@ from datetime import datetime, timezone
 from .redis import redis
 from libs.logger import logger
 
+from fastapi import Header
+from permission import AppPermission
+
 oauth2 = OAuth2PasswordBearer(tokenUrl="/auth/signin", auto_error=False)
 
 async def get_user(
     request: Request,
     db: AsyncSession = Depends(get_db),
     header_token: Optional[str] = Depends(oauth2),
-    cookie_token: Optional[str] = Cookie(None, alias="access_token")
+    cookie_token: Optional[str] = Cookie(None, alias="access_token"),
+    x_api_key: Optional[str] = Header(None, alias="X-API-Key"),
 ) -> UserManage:
     token = header_token or cookie_token
+    api_key_candidate = x_api_key
+
+    if header_token and header_token.startswith("onyx_sec_"):
+        api_key_candidate = header_token
+        token = None
+
+    if api_key_candidate:
+        api_key_clean = api_key_candidate.strip()
+        stmt = (
+            select(User)
+            .options(
+                selectinload(User.current_subscription)
+                .selectinload(Subscription.tier)
+            )
+            .where(User.api_key == api_key_clean, User.deleted_at.is_(None))
+        )
+        user_obj = await db.scalar(stmt)
+        if not user_obj:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid API key provided",
+            )
+
+        if user_obj.status != USER_STATUS.ACTIVE:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Inactive account",
+            )
+
+        from routers.v1.client.utils import get_user_permissions_and_limits
+        perms, _ = get_user_permissions_and_limits(user_obj)
+        if AppPermission.API_ACCESS not in perms and AppPermission.API_ACCESS.value not in perms:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="API access is not enabled on your subscription tier. Upgrade to unlock API access.",
+            )
+
+        return UserManage.model_validate(user_obj)
+
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Missing authentication token",
+            detail="Missing authentication token or API key",
         )
     data = decode(token)
 

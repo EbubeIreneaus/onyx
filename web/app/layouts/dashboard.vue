@@ -9,6 +9,7 @@ const navItems = [
   { label: 'Overview', icon: 'i-lucide-layout-dashboard', to: '/dashboard' },
   { label: 'Links', icon: 'i-lucide-link', to: '/dashboard/links' },
   { label: 'Domains', icon: 'i-lucide-globe', to: '/dashboard/domains' },
+  { label: 'Developer API', icon: 'i-lucide-code-2', to: '/dashboard/developer' },
   { label: 'Settings', icon: 'i-lucide-settings', to: '/dashboard/settings' },
 ]
 
