@@ -23,7 +23,7 @@ app = FastAPI(title="Onyx Link Managent & Web Tracking")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[f"https://{settings.DOMAIN_NAME}", "http://localhost:3000"],
+    allow_origins=[f"https://{settings.DOMAIN_NAME}", "http://localhost:3000", "http://localhost:3001"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -83,7 +83,7 @@ async def create_domain(
                 detail=f"Maximum custom domains limit ({limits['max_custom_domains']}) reached for your tier",
             )
 
-        txt_token = f"onyx-verify-{secrets.token_hex(16)}"
+        txt_token = f"onyx-domain-verification={secrets.token_urlsafe(16)}"
         redis_key = f"onyx:txt_dns_verify:{user.user_id}:{domain_name}"
         await redis.set(redis_key, txt_token, ex=86400)
 
@@ -92,6 +92,7 @@ async def create_domain(
             user_id=user.user_id,
             txt_verified=False,
             cname_verified=False,
+            txt_token=txt_token,
         )
         db.add(new_domain)
         await db.commit()
@@ -114,10 +115,13 @@ async def check_domain(
         )
 
     domain_obj = await db.scalar(select(DomainModel).where(DomainModel.name == domain_name))
-    is_subdomain = domain_name.endswith(settings.DOMAIN_NAME)
+    is_subdomain = domain_name.endswith(settings.DOMAIN_NAME) or domain_name == settings.DOMAIN_NAME
     txt_verification_token = None
 
-    if not is_subdomain:
+    if domain_obj:
+        txt_verification_token = domain_obj.txt_token
+
+    if not is_subdomain and not txt_verification_token:
         redis_key = f"onyx:txt_dns_verify:{user.user_id}:{domain_name}"
         stored_token = await redis.get(redis_key)
         if stored_token:
@@ -125,6 +129,51 @@ async def check_domain(
             if domain_obj and not domain_obj.txt_verified:
                 domain_obj.txt_verified = True
                 await db.commit()
+
+    registered = domain_obj is not None
+    owned_by_user = domain_obj.user_id == user.user_id if domain_obj else False
+    domain_id = domain_obj.id if domain_obj else None
+
+    # Default app domain is always considered registered & verified for everyone
+    if domain_name == settings.DOMAIN_NAME:
+        registered = True
+        owned_by_user = True
+
+    if not registered and not is_subdomain:
+        return DomainCheckResponse(
+            available=False,
+            registered=False,
+            owned_by_user=False,
+            txt_verified=False,
+            cname_verified=False,
+            domain_id=None,
+            message="Domain is not registered in Onyx. Please register it first.",
+            txt_verification_token=txt_verification_token
+        )
+
+    if registered and not owned_by_user:
+        return DomainCheckResponse(
+            available=False,
+            registered=True,
+            owned_by_user=False,
+            txt_verified=domain_obj.txt_verified if domain_obj else False,
+            cname_verified=domain_obj.cname_verified if domain_obj else False,
+            domain_id=domain_id,
+            message="Domain is already registered by another user",
+            txt_verification_token=txt_verification_token
+        )
+
+    if domain_obj and owned_by_user and not domain_obj.txt_verified and not is_subdomain:
+        return DomainCheckResponse(
+            available=False,
+            registered=True,
+            owned_by_user=True,
+            txt_verified=False,
+            cname_verified=domain_obj.cname_verified,
+            domain_id=domain_id,
+            message="Domain TXT record is not verified",
+            txt_verification_token=txt_verification_token
+        )
 
     existing_redirect = await db.scalar(
         select(RedirectModel).where(
@@ -136,16 +185,22 @@ async def check_domain(
     if existing_redirect:
         return DomainCheckResponse(
             available=False,
-            txt_verified=domain_obj.txt_verified if domain_obj else False,
-            cname_verified=domain_obj.cname_verified if domain_obj else False,
+            registered=registered,
+            owned_by_user=owned_by_user,
+            txt_verified=domain_obj.txt_verified if domain_obj else is_subdomain,
+            cname_verified=domain_obj.cname_verified if domain_obj else is_subdomain,
+            domain_id=domain_id,
             message="A short link with this domain and slug already exists",
             txt_verification_token=txt_verification_token
         )
 
     return DomainCheckResponse(
         available=True,
+        registered=registered,
+        owned_by_user=owned_by_user,
         txt_verified=domain_obj.txt_verified if domain_obj else is_subdomain,
         cname_verified=domain_obj.cname_verified if domain_obj else is_subdomain,
+        domain_id=domain_id,
         message="Domain and slug path are available",
         txt_verification_token=txt_verification_token
     )
@@ -157,6 +212,19 @@ async def list_domains(
 ):
     domains = await db.scalars(select(DomainModel).where(DomainModel.user_id == user.user_id))
     return domains.all()
+
+@router.get("/domains/{domain_id}", response_model=DomainResponse)
+async def get_domain(
+    domain_id: int,
+    user: UserOut = Depends(get_user),
+    db: AsyncSession = Depends(get_db),
+):
+    domain_obj = await db.scalar(
+        select(DomainModel).where(DomainModel.id == domain_id, DomainModel.user_id == user.user_id)
+    )
+    if not domain_obj:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Domain not found")
+    return domain_obj
 
 @router.patch("/domains/{domain_id}", response_model=DomainResponse)
 async def update_domain(

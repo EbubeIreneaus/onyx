@@ -40,9 +40,14 @@ password_hash = PasswordHash.recommended()
 
 env = settings.APP_ENV
 cookie_is_secure = True if env == "production" else False
-cookie_domain = f".{settings.DOMAIN_NAME}" if env == "production" else 'localhost'
+cookie_domain = f".{settings.DOMAIN_NAME}" if env == "production" else None
+
+@router.get("/me", response_model=UserOut)
+async def get_me(current_user: UserOut = Depends(get_user)):
+    return current_user
 
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
+
 @limiter.limit("25/hour", error_message="Too many requests, try again later")
 async def signup(
     request: Request,
@@ -249,7 +254,8 @@ async def refresh_token(
     )
     session = await db.scalar(stmt)
 
-    now = datetime.now()
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+
     if not session or session.expires_at <= now:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -265,6 +271,7 @@ async def refresh_token(
 
     session.refresh_token = n_r_hashed
     session.expires_at = refresh_token_expires_at.replace(tzinfo=None)
+    await db.commit()
 
     jwt_payload = {
         "sub": str(session.user.user_id),

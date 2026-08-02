@@ -24,6 +24,7 @@ class Domain(Base):
     user: Mapped['User'] = relationship(back_populates="domains")
     txt_verified: Mapped[bool] = mapped_column(Boolean, default=False)
     cname_verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    txt_token: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 class Redirect(Base):

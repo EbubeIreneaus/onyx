@@ -25,12 +25,12 @@ def get_user_permissions_and_limits(user: UserManage) -> Tuple[Set[Any], Dict[st
                 logger.debug(f"Could not convert permission value '{val}' to AppPermission: {err}")
         
         limits = {
-            "max_short_link": parse_int_limit(tier.max_short_link, settings.MIN_ALLOWED_SHORT_LINKS),
-            "max_custom_domains": parse_int_limit(tier.max_custom_domains, 0),
-            "max_onyx_subdomains": parse_int_limit(tier.max_onyx_subdomains, 0),
-            "max_custom_paths": parse_int_limit(tier.max_custom_paths, 0),
-            "max_visits_per_shortlink": parse_int_limit(tier.max_visits_per_shortlink, 500),
-            "link_durability": parse_int_limit(tier.link_durability, 14),
+            "max_short_link": parse_int_limit(getattr(tier, "max_short_link", None), settings.MIN_ALLOWED_SHORT_LINKS),
+            "max_custom_domains": parse_int_limit(getattr(tier, "max_custom_domains", None), 0),
+            "max_onyx_subdomains": parse_int_limit(getattr(tier, "max_onyx_subdomains", None), 0),
+            "max_custom_paths": parse_int_limit(getattr(tier, "max_custom_paths", None), 0),
+            "max_visits_per_shortlink": parse_int_limit(getattr(tier, "max_visits_per_shortlink", None), 500),
+            "link_durability": parse_int_limit(getattr(tier, "link_durability", None), 14),
         }
     else:
         limits = {

@@ -51,7 +51,7 @@ async def get_user(
                 .selectinload(User.current_subscription)
                 .selectinload(Subscription.tier)
             )
-            .where(Session.session_id == session_id, Session.expires_at > datetime.now())
+            .where(Session.session_id == session_id, Session.expires_at > now.replace(tzinfo=None))
         )
 
         if not s:

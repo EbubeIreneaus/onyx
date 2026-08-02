@@ -7,6 +7,7 @@ class RedirectCreate(BaseModel):
     destination: str
     domain: Optional[str] = None
     slug: Optional[str] = None
+    type: Optional[str] = None
     expired_on: Optional[datetime] = None
 
 class RedirectUpdate(BaseModel):

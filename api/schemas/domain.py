@@ -14,8 +14,11 @@ class DomainCheckRequest(BaseModel):
 
 class DomainCheckResponse(BaseModel):
     available: bool
-    txt_verified: bool
-    cname_verified: bool
+    registered: bool = False
+    owned_by_user: bool = False
+    txt_verified: bool = False
+    cname_verified: bool = False
+    domain_id: Optional[int] = None
     message: str
     txt_verification_token: Optional[str] = None
 
@@ -25,4 +28,5 @@ class DomainResponse(BaseModel):
     name: str
     txt_verified: bool
     cname_verified: bool
+    txt_token: Optional[str] = None
     created_at: datetime

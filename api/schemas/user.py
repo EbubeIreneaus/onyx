@@ -54,7 +54,12 @@ class TierOut(BaseModel):
     name: str
     price: Decimal
     permissions: List[AppPermission]
-    max_short_link: int
+    max_short_link: str
+    link_durability: Optional[str] = "14"
+    max_custom_domains: Optional[str] = "0"
+    max_onyx_subdomains: Optional[str] = "0"
+    max_custom_paths: Optional[str] = "0"
+    max_visits_per_shortlink: Optional[str] = "500"
     is_active: bool
 
 class SubscriptionOut(BaseModel):
