@@ -129,13 +129,12 @@ function truncate(s: string, n = 45) {
         <!-- Info -->
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2 mb-0.5">
-            <a
-              :href="`https://${link.domain}/${link.slug}`"
-              target="_blank"
+            <NuxtLink
+              :to="`/dashboard/redirect/${link.redirect_id}`"
               class="text-sm font-semibold text-slate-900 dark:text-white hover:text-zinc-600 dark:hover:text-zinc-400 transition-colors"
             >
               {{ link.domain }}/{{ link.slug }}
-            </a>
+            </NuxtLink>
             <UBadge
               :color="link.expired ? 'neutral' : 'success'"
               variant="soft"
@@ -148,10 +147,10 @@ function truncate(s: string, n = 45) {
 
         <!-- Metadata (hidden on mobile) -->
         <div class="hidden md:flex items-center gap-6 shrink-0 text-center">
-          <div>
+          <NuxtLink :to="`/dashboard/redirect/${link.redirect_id}`" class="hover:underline">
             <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ (link.visitor_count || 0).toLocaleString() }}</p>
             <p class="text-xs text-slate-400">clicks</p>
-          </div>
+          </NuxtLink>
           <div>
             <p class="text-xs text-slate-500">{{ formatDate(link.created_at) }}</p>
             <p class="text-xs text-slate-400">created</p>
@@ -164,6 +163,7 @@ function truncate(s: string, n = 45) {
 
         <!-- Actions -->
         <div class="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+          <UButton icon="i-lucide-bar-chart-3" size="xs" color="neutral" variant="ghost" title="View Analytics" :to="`/dashboard/redirect/${link.redirect_id}`" />
           <UButton icon="i-lucide-copy" size="xs" color="neutral" variant="ghost" title="Copy link" @click="copyLink(link)" />
           <UButton icon="i-lucide-external-link" size="xs" color="neutral" variant="ghost" title="Open link"
             :to="`https://${link.domain}/${link.slug}`" target="_blank" />

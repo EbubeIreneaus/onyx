@@ -18,7 +18,7 @@ const slug = computed(() => {
 
 onMounted(async () => {
   const fullUrl = window.location.href
-  const domain = window.location.host.split(':')[0]
+  const domain = window.location.host
   
   try {
     const res = await $fetch<{
@@ -45,11 +45,10 @@ onMounted(async () => {
       expired.value = true
     }
     errorMsg.value = res.message || 'Link not found or has been deactivated.'
+    loading.value = false
   }
   catch (err: any) {
     errorMsg.value = 'Failed to resolve link destination.'
-  }
-  finally {
     loading.value = false
   }
 })

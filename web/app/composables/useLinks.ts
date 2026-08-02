@@ -17,6 +17,48 @@ export interface CreateLinkBody {
   expired_on?: string
 }
 
+export interface TimeSeriesPoint {
+  date: string
+  visits: number
+}
+
+export interface CountryAnalytics {
+  country: string
+  visits: number
+  percentage: number
+}
+
+export interface DeviceAnalytics {
+  device: string
+  visits: number
+}
+
+export interface VisitorLog {
+  id: number
+  ip: string
+  location?: string | null
+  device?: string | null
+  created_at: string
+}
+
+export interface RedirectAnalyticsResponse {
+  redirect_id: string
+  domain: string
+  slug?: string | null
+  destination: string
+  expired: boolean
+  expired_on?: string | null
+  created_at: string
+  total_clicks: number
+  unique_visitors: number
+  top_country?: string | null
+  top_device?: string | null
+  chart_data: TimeSeriesPoint[]
+  country_data: CountryAnalytics[]
+  device_data: DeviceAnalytics[]
+  recent_visitors: VisitorLog[]
+}
+
 export const useLinks = () => {
   const api = useApi()
   const toast = useToast()
@@ -38,6 +80,18 @@ export const useLinks = () => {
     }
     finally {
       pending.value = false
+    }
+  }
+
+  // ── Fetch single link analytics ────────────────────────────────────────────
+  const fetchAnalytics = async (redirectId: string, period = 'daily'): Promise<RedirectAnalyticsResponse | null> => {
+    try {
+      return await api<RedirectAnalyticsResponse>(`/api/v1/client/redirects/${redirectId}/analytics?period=${period}`)
+    }
+    catch (err: any) {
+      const msg = err?.data?.detail || 'Failed to fetch link analytics.'
+      toast.add({ title: 'Error', description: msg, color: 'error' })
+      return null
     }
   }
 
@@ -94,6 +148,7 @@ export const useLinks = () => {
     expiredLinks,
     totalClicks,
     fetchLinks,
+    fetchAnalytics,
     createLink,
     deleteLink,
     copyLink,

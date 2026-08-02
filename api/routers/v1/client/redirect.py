@@ -1,7 +1,7 @@
 import secrets
 import uuid
 from datetime import datetime, timezone, timedelta
-from typing import List
+from typing import List, Dict
 from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
@@ -105,7 +105,7 @@ async def create_short_link(
                 detail=f"Maximum custom paths limit ({limits['max_custom_paths']}) reached for your tier",
             )
 
-        slug = body.slug.strip()
+        slug = body.slug.strip().strip('/')
     else:
         slug = secrets.token_urlsafe(4)[:6]
 
@@ -223,15 +223,16 @@ async def update_redirect(
     if body.destination:
         r.destination = body.destination
     if body.slug:
+        clean_slug = body.slug.strip().strip('/')
         permissions, _ = get_user_permissions_and_limits(user)
         if AppPermission.CUSTOM_PATH not in permissions and AppPermission.CUSTOM_PATH.value not in permissions:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Custom slug permission required")
         existing_slug = await db.scalar(
-            select(RedirectModel).where(RedirectModel.domain == r.domain, RedirectModel.slug == body.slug, RedirectModel.id != r.id)
+            select(RedirectModel).where(RedirectModel.domain == r.domain, RedirectModel.slug == clean_slug, RedirectModel.id != r.id)
         )
         if existing_slug:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="A short link with this domain and slug already exists")
-        r.slug = body.slug
+        r.slug = clean_slug
     if body.expired is not None:
         r.expired = body.expired
     if body.expired_on is not None:
@@ -279,17 +280,19 @@ async def resolve_redirect(
     x_forwarded_for: Annotated[str | None, Header()] = None,
 ):
     from workers.config import get_arq_pool
-    raw_domain = body.domain.lower().strip() if body.domain else ""
-    slug = (body.slug or "").strip().lstrip('/')
+    raw_domain = (body.domain or "").lower().strip()
+    slug = (body.slug or "").strip().strip('/')
 
     if body.full_url:
         try:
             from urllib.parse import urlparse
             parsed = urlparse(body.full_url)
             if parsed.netloc:
-                raw_domain = parsed.netloc.lower().split(':')[0]
-            if not slug and parsed.path:
-                slug = parsed.path.strip('/')
+                raw_domain = parsed.netloc.lower().strip()
+            if parsed.path:
+                clean_path = parsed.path.strip().strip('/')
+                if clean_path:
+                    slug = clean_path
         except Exception:
             pass
 
@@ -398,3 +401,131 @@ async def resolve_redirect(
         logger.warning(f"Failed to enqueue visitor tracking job: {err}")
 
     return RedirectResolveResponse(found=True, destination=redirect_obj.destination, expired=False)
+
+from schemas.redirect import (
+    TimeSeriesPoint,
+    CountryAnalytics,
+    DeviceAnalytics,
+    RedirectAnalyticsResponse,
+)
+
+@router.get("/redirects/{redirect_id}/analytics", response_model=RedirectAnalyticsResponse)
+async def get_redirect_analytics(
+    redirect_id: str,
+    period: str = "daily",
+    user: UserOut = Depends(get_user),
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = select(RedirectModel).where(RedirectModel.user_id == user.user_id)
+    try:
+        r_uuid = uuid.UUID(redirect_id)
+        stmt = stmt.where(RedirectModel.redirect_id == r_uuid)
+    except ValueError:
+        stmt = stmt.where(RedirectModel.slug == redirect_id)
+
+    r = await db.scalar(stmt)
+    if not r:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Redirect link not found")
+
+    now = datetime.now(timezone.utc)
+    p = period.lower().strip()
+
+    if p == "yearly":
+        start_date = now - timedelta(days=365)
+    elif p == "weekly":
+        start_date = now - timedelta(weeks=12)
+    else:
+        start_date = now - timedelta(days=7)
+
+    v_stmt = (
+        select(RedirectVisitorModel)
+        .where(
+            RedirectVisitorModel.redirect_id == r.redirect_id,
+            RedirectVisitorModel.created_at >= start_date
+        )
+        .order_by(RedirectVisitorModel.created_at.asc())
+    )
+    visitors = (await db.scalars(v_stmt)).all()
+
+    total_clicks = len(visitors)
+    unique_ips = set(v.ip for v in visitors if v.ip)
+
+    chart_dict: Dict[str, int] = {}
+    if p == "yearly":
+        for i in range(11, -1, -1):
+            m_dt = now - timedelta(days=i * 30)
+            chart_dict[m_dt.strftime("%b %Y")] = 0
+        for v in visitors:
+            k = v.created_at.strftime("%b %Y")
+            chart_dict[k] = chart_dict.get(k, 0) + 1
+    elif p == "weekly":
+        for i in range(11, -1, -1):
+            w_dt = now - timedelta(weeks=i)
+            chart_dict[f"Wk {w_dt.strftime('%U')}"] = 0
+        for v in visitors:
+            k = f"Wk {v.created_at.strftime('%U')}"
+            chart_dict[k] = chart_dict.get(k, 0) + 1
+    else:
+        for i in range(6, -1, -1):
+            d_dt = now - timedelta(days=i)
+            chart_dict[d_dt.strftime("%b %d")] = 0
+        for v in visitors:
+            k = v.created_at.strftime("%b %d")
+            chart_dict[k] = chart_dict.get(k, 0) + 1
+
+    chart_data = [TimeSeriesPoint(date=k, visits=v) for k, v in chart_dict.items()]
+
+    country_counts: Dict[str, int] = {}
+    for v in visitors:
+        loc = v.location or "Unknown Location"
+        c_name = loc.split(",")[-1].strip() if "," in loc else loc
+        country_counts[c_name] = country_counts.get(c_name, 0) + 1
+
+    sorted_countries = sorted(country_counts.items(), key=lambda x: x[1], reverse=True)
+    country_data = [
+        CountryAnalytics(
+            country=c,
+            visits=cnt,
+            percentage=round((cnt / total_clicks) * 100, 1) if total_clicks > 0 else 0.0
+        )
+        for c, cnt in sorted_countries
+    ]
+    top_country = sorted_countries[0][0] if sorted_countries else "None"
+
+    device_counts: Dict[str, int] = {}
+    for v in visitors:
+        dev = v.device or "Unknown Device"
+        device_counts[dev] = device_counts.get(dev, 0) + 1
+
+    sorted_devices = sorted(device_counts.items(), key=lambda x: x[1], reverse=True)
+    device_data = [
+        DeviceAnalytics(device=d, visits=cnt)
+        for d, cnt in sorted_devices
+    ]
+    top_device = sorted_devices[0][0] if sorted_devices else "None"
+
+    recent_stmt = (
+        select(RedirectVisitorModel)
+        .where(RedirectVisitorModel.redirect_id == r.redirect_id)
+        .order_by(RedirectVisitorModel.created_at.desc())
+        .limit(20)
+    )
+    recent_visitors = (await db.scalars(recent_stmt)).all()
+
+    return RedirectAnalyticsResponse(
+        redirect_id=str(r.redirect_id),
+        domain=r.domain,
+        slug=r.slug,
+        destination=r.destination,
+        expired=r.expired,
+        expired_on=r.expired_on,
+        created_at=r.created_at,
+        total_clicks=total_clicks,
+        unique_visitors=len(unique_ips),
+        top_country=top_country,
+        top_device=top_device,
+        chart_data=chart_data,
+        country_data=country_data,
+        device_data=device_data,
+        recent_visitors=[RedirectVisitorResponse.model_validate(v) for v in recent_visitors],
+    )

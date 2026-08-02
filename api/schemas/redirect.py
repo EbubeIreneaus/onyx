@@ -47,3 +47,33 @@ class RedirectResolveResponse(BaseModel):
     destination: Optional[str] = None
     expired: bool = False
     message: Optional[str] = None
+
+class TimeSeriesPoint(BaseModel):
+    date: str
+    visits: int
+
+class CountryAnalytics(BaseModel):
+    country: str
+    visits: int
+    percentage: float
+
+class DeviceAnalytics(BaseModel):
+    device: str
+    visits: int
+
+class RedirectAnalyticsResponse(BaseModel):
+    redirect_id: str
+    domain: str
+    slug: Optional[str] = None
+    destination: str
+    expired: bool
+    expired_on: Optional[datetime] = None
+    created_at: datetime
+    total_clicks: int
+    unique_visitors: int
+    top_country: Optional[str] = None
+    top_device: Optional[str] = None
+    chart_data: List[TimeSeriesPoint]
+    country_data: List[CountryAnalytics]
+    device_data: List[DeviceAnalytics]
+    recent_visitors: List[RedirectVisitorResponse]

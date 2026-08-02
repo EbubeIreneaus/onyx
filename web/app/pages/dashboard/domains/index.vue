@@ -4,6 +4,8 @@ definePageMeta({ layout: 'dashboard', middleware: ['auth'] })
 useSeoMeta({ title: 'Domains — Onyx' })
 
 const { domains, verifiedDomains, pendingDomains, fetchDomains, createDomain, deleteDomain, pending } = useDomains()
+const config = useRuntimeConfig()
+const defaultDomain = (config.public.domainName as string) || 'onyx.com'
 
 fetchDomains()
 
@@ -141,7 +143,7 @@ function formatDate(d: string) {
       <template #body>
         <div class="space-y-4 p-1">
           <UAlert
-            description="Custom domains require TXT DNS verification before use. Onyx subdomains (*.onyx.com) are verified automatically."
+            :description="`Custom domains require TXT DNS verification before use. Subdomains (*.${defaultDomain}) are verified automatically.`"
             color="info"
             variant="soft"
             icon="i-lucide-info"
@@ -150,7 +152,7 @@ function formatDate(d: string) {
             <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Domain name</label>
             <UInput
               v-model="newDomain"
-              placeholder="yourdomain.com or sub.onyx.com"
+              :placeholder="`yourdomain.com or sub.${defaultDomain}`"
               icon="i-lucide-globe"
               size="md"
               class="w-full"
