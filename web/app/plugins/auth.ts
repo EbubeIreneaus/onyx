@@ -1,7 +1,7 @@
-// Universal plugin (SSR + Client) to restore auth session before app renders
+// Plugin to restore auth session on initial load
 export default defineNuxtPlugin(async () => {
-  const { restore, initialized } = useAuth()
-  if (!initialized.value) {
-    await restore()
+  const { isAuthenticated, fetchUser } = useAuth()
+  if (!isAuthenticated.value) {
+    await fetchUser()
   }
 })

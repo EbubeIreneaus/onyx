@@ -19,8 +19,8 @@ export const useApi = () => {
     async onResponseError({ response }) {
       if (response.status === 401 && import.meta.client) {
         try {
-          const { restore } = useAuth()
-          await restore()
+          const { fetchUser } = useAuth()
+          await fetchUser()
         }
         catch {
           await router.push('/login')

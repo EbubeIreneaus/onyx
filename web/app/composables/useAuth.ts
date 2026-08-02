@@ -29,10 +29,7 @@ export interface UserOut {
 }
 
 export const useAuth = () => {
-  // useState must live inside the composable (needs Nuxt instance).
-  // The string key means every call returns the same reactive ref — state is global.
   const user = useState<UserOut | null>('auth.user', () => null)
-  const initialized = useState<boolean>('auth.initialized', () => false)
   const loading = useState<boolean>('auth.loading', () => false)
 
   const config = useRuntimeConfig()
@@ -43,50 +40,46 @@ export const useAuth = () => {
 
   const isAuthenticated = computed(() => !!user.value)
 
-  let restorePromise: Promise<void> | null = null
+  let fetchUserPromise: Promise<void> | null = null
 
-  // ── Restore session from refresh token cookie ──────────────────────────────
-  const restore = async () => {
-    if (initialized.value) return
-    if (restorePromise) return restorePromise
-    restorePromise = (async () => {
+  // ── Fetch current user profile & refresh token if needed ───────────────────
+  const fetchUser = async () => {
+    if (user.value) return
+    if (fetchUserPromise) return fetchUserPromise
+    fetchUserPromise = (async () => {
+      const headers = import.meta.server ? (useRequestHeaders(['cookie']) as Record<string, string>) : undefined
       try {
-        const headers = import.meta.server ? (useRequestHeaders(['cookie']) as Record<string, string>) : undefined
-        const res = await $fetch<{ success: boolean; token: string; refresh_token: string }>('/api/v1/auth/refresh-token', {
-          method: 'POST',
+        const res = await $fetch<UserOut>('/api/v1/auth/me', {
           baseURL: apiBase,
           credentials: 'include',
           headers,
         })
-        if (res?.success) {
-          await fetchMe(headers)
-        }
+        user.value = res
       }
       catch {
-        user.value = null
+        try {
+          await $fetch('/api/v1/auth/refresh-token', {
+            method: 'POST',
+            baseURL: apiBase,
+            credentials: 'include',
+            headers,
+          })
+          const res = await $fetch<UserOut>('/api/v1/auth/me', {
+            baseURL: apiBase,
+            credentials: 'include',
+            headers,
+          })
+          user.value = res
+        }
+        catch {
+          user.value = null
+        }
       }
       finally {
-        initialized.value = true
-        restorePromise = null
+        fetchUserPromise = null
       }
     })()
-    return restorePromise
-  }
-
-  // ── Fetch current user profile ─────────────────────────────────────────────
-  const fetchMe = async (customHeaders?: Record<string, string>) => {
-    try {
-      const headers = customHeaders || (import.meta.server ? (useRequestHeaders(['cookie']) as Record<string, string>) : undefined)
-      const res = await $fetch<UserOut>('/api/v1/auth/me', {
-        baseURL: apiBase,
-        credentials: 'include',
-        headers,
-      })
-      user.value = res
-    }
-    catch {
-      user.value = null
-    }
+    return fetchUserPromise
   }
 
   // ── Sign Up ────────────────────────────────────────────────────────────────
@@ -100,7 +93,7 @@ export const useAuth = () => {
         body: { fullname, email, password },
       })
       if (res.success) {
-        await fetchMe()
+        await fetchUser()
         await router.push('/dashboard')
       }
     }
@@ -125,7 +118,7 @@ export const useAuth = () => {
         body: { email, password },
       })
       if (res.success) {
-        await fetchMe()
+        await fetchUser()
         await router.push('/dashboard')
       }
     }
@@ -157,11 +150,11 @@ export const useAuth = () => {
 
   return {
     user: readonly(user),
-    initialized: readonly(initialized),
     loading: readonly(loading),
     isAuthenticated,
-    restore,
-    fetchMe,
+    fetchUser,
+    fetchMe: fetchUser,
+    restore: fetchUser,
     signup,
     signin,
     signout,

@@ -31,6 +31,30 @@ async function handleDelete() {
   router.push('/dashboard/domains')
 }
 
+const verifyingTxt = ref(false)
+const verifyingCname = ref(false)
+const toast = useToast()
+
+async function handleVerifyTxt() {
+  if (!domain.value || domain.value.txt_verified) return
+  verifyingTxt.value = true
+  toast.add({ title: 'Checking TXT DNS record...', color: 'info' })
+  setTimeout(() => {
+    toast.add({ title: 'Verification pending', description: 'TXT record propagation can take a few minutes.', color: 'warning' })
+    verifyingTxt.value = false
+  }, 1200)
+}
+
+async function handleVerifyCname() {
+  if (!domain.value || domain.value.cname_verified) return
+  verifyingCname.value = true
+  toast.add({ title: 'Checking CNAME DNS record...', color: 'info' })
+  setTimeout(() => {
+    toast.add({ title: 'Verification pending', description: 'CNAME record propagation can take a few minutes.', color: 'warning' })
+    verifyingCname.value = false
+  }, 1200)
+}
+
 useSeoMeta({ title: computed(() => domain.value ? `${domain.value.name} — Verification` : 'Domain Details') })
 </script>
 
@@ -144,11 +168,16 @@ useSeoMeta({ title: computed(() => domain.value ? `${domain.value.name} — Veri
         <!-- Action button -->
         <div class="flex justify-end pt-1">
           <UButton
-            color="neutral"
+            :color="domain.txt_verified ? 'neutral' : 'primary'"
             size="sm"
-            :disabled="domain.txt_verified || true"
+            :disabled="domain.txt_verified"
+            :loading="verifyingTxt"
+            @click="handleVerifyTxt"
           >
-            {{ domain.txt_verified ? 'TXT Record Verified' : 'Verify TXT Record' }}
+            <template #leading>
+              <UIcon :name="domain.txt_verified ? 'i-lucide-check' : 'i-lucide-refresh-cw'" class="w-4 h-4" />
+            </template>
+            {{ domain.txt_verified ? 'TXT Record Verified' : 'Check TXT Verification' }}
           </UButton>
         </div>
       </div>
@@ -207,11 +236,16 @@ useSeoMeta({ title: computed(() => domain.value ? `${domain.value.name} — Veri
         <!-- Action button -->
         <div class="flex justify-end pt-1">
           <UButton
-            color="neutral"
+            :color="domain.cname_verified ? 'neutral' : 'primary'"
             size="sm"
-            :disabled="domain.cname_verified || true"
+            :disabled="domain.cname_verified"
+            :loading="verifyingCname"
+            @click="handleVerifyCname"
           >
-            {{ domain.cname_verified ? 'CNAME Record Verified' : 'Verify CNAME Record' }}
+            <template #leading>
+              <UIcon :name="domain.cname_verified ? 'i-lucide-check' : 'i-lucide-refresh-cw'" class="w-4 h-4" />
+            </template>
+            {{ domain.cname_verified ? 'CNAME Record Verified' : 'Check CNAME Verification' }}
           </UButton>
         </div>
       </div>

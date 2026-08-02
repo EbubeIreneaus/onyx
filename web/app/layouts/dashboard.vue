@@ -23,7 +23,15 @@ watch(() => route.path, () => { isMobileOpen.value = false })
 
 <template>
   <UApp>
-    <div class="min-h-screen flex bg-slate-50 dark:bg-slate-950">
+    <!-- Full-screen loading fallback while auth session resolves -->
+    <div v-if="!user" class="min-h-screen flex items-center justify-center bg-zinc-950 text-white">
+      <div class="flex flex-col items-center gap-3">
+        <AppLogo />
+        <UIcon name="i-lucide-loader-2" class="w-5 h-5 animate-spin text-zinc-500 mt-1" />
+      </div>
+    </div>
+
+    <div v-else class="min-h-screen flex bg-slate-50 dark:bg-slate-950">
 
       <!-- ── Sidebar ─────────────────────────────────────── -->
       <!-- Mobile overlay -->
@@ -72,26 +80,31 @@ watch(() => route.path, () => { isMobileOpen.value = false })
         <!-- Bottom: user profile + signout -->
         <div class="shrink-0 p-3 border-t border-zinc-200 dark:border-zinc-800">
           <!-- Subscription badge -->
-          <div v-if="user?.current_subscription?.tier" class="mb-2 px-3 py-2 rounded-md bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/60">
-            <div class="flex items-center gap-2">
-              <UIcon name="i-lucide-zap" class="w-4 h-4 text-zinc-700 dark:text-zinc-300" />
-              <span class="text-xs font-semibold text-zinc-800 dark:text-zinc-200 uppercase tracking-wide">
-                {{ user.current_subscription.tier.name }}
-              </span>
+          <NuxtLink to="/dashboard/settings" class="block mb-2 px-3 py-2 rounded-md bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/60 hover:bg-zinc-200 dark:hover:bg-zinc-700/80 transition-colors">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <UIcon name="i-lucide-zap" class="w-4 h-4 text-amber-500" />
+                <span class="text-xs font-semibold text-zinc-800 dark:text-zinc-200 uppercase tracking-wide">
+                  {{ user?.current_subscription?.tier?.name || 'No Plan' }}
+                </span>
+              </div>
+              <span class="text-[10px] font-medium text-amber-600 dark:text-amber-400 underline">Manage</span>
             </div>
-          </div>
+          </NuxtLink>
 
           <!-- User row -->
-          <div class="flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
-            <UAvatar
-              :alt="user?.fullname || 'User'"
-              size="sm"
-              class="shrink-0 bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200"
-            />
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-semibold text-zinc-900 dark:text-white truncate">{{ user?.fullname }}</p>
-              <p class="text-xs text-zinc-500 dark:text-zinc-400 truncate">{{ user?.email }}</p>
-            </div>
+          <div class="flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+            <NuxtLink to="/dashboard/settings" class="flex items-center gap-3 flex-1 min-w-0 pr-2">
+              <UAvatar
+                :alt="user?.fullname || 'User'"
+                size="sm"
+                class="shrink-0 bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-bold"
+              />
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-zinc-900 dark:text-white truncate">{{ user?.fullname }}</p>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400 truncate">{{ user?.email }}</p>
+              </div>
+            </NuxtLink>
             <UButton
               icon="i-lucide-log-out"
               size="xs"

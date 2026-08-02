@@ -5,9 +5,7 @@ useSeoMeta({ title: 'Links — Onyx' })
 
 const { links, activeLinks, expiredLinks, totalClicks, fetchLinks, pending, createLink, copyLink, deleteLink } = useLinks()
 
-onMounted(() => {
-  fetchLinks()
-})
+fetchLinks()
 
 // Create modal state
 const showModal = ref(false)

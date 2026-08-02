@@ -167,10 +167,6 @@ async def process_paystack_webhook_task(ctx: dict, event_type: str, data: Dict[s
                     )
                     if sub:
                         sub.status = SUBSCRIPTION_STATUS.CANCELLED
-                        user = await db.scalar(select(UserModel).where(UserModel.user_id == sub.user_id))
-                        if user and user.current_sub_id == sub.sub_id:
-                            user.current_sub_id = None
-
                         await db.commit()
 
                         try:

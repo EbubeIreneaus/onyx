@@ -15,6 +15,8 @@ if (isAuthenticated.value) {
 const state = reactive({ fullname: '', email: '', password: '', confirm: '' })
 const error = ref('')
 
+const route = useRoute()
+
 async function handleSubmit() {
   error.value = ''
   if (state.password !== state.confirm) {
@@ -27,6 +29,10 @@ async function handleSubmit() {
   }
   try {
     await signup(state.fullname, state.email, state.password)
+    const planParam = route.query.plan
+    if (planParam) {
+      await navigateTo(`/dashboard/settings?plan=${planParam}`)
+    }
   }
   catch (err: any) {
     error.value = err?.data?.detail || 'Registration failed. Please try again.'

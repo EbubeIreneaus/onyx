@@ -18,7 +18,8 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    '/': { prerender: true }
+    '/': { prerender: true },
+    '/dashboard/**': { ssr: false }
   },
 
   compatibilityDate: '2026-06-30',

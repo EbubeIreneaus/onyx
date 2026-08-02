@@ -172,6 +172,47 @@ async def verify_payment(
 
     return {"success": True, "message": "Payment verified and subscription activated", "tier": tier.name}
 
+@router.get("/tiers")
+async def list_tiers(db: AsyncSession = Depends(get_db)):
+    tiers = await db.scalars(
+        select(TierModel).where(TierModel.is_active == True, TierModel.deleted == False)
+    )
+    return tiers.all()
+
+@router.post("/cancel")
+async def cancel_subscription(
+    user: UserOut = Depends(get_user),
+    db: AsyncSession = Depends(get_db),
+):
+    user_obj = await db.scalar(
+        select(UserModel)
+        .options(selectinload(UserModel.current_subscription))
+        .where(UserModel.user_id == user.user_id)
+    )
+    if not user_obj or not user_obj.current_subscription:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No active subscription found")
+
+    sub = user_obj.current_subscription
+    if sub.paystack_subscription_code and sub.paystack_email_token:
+        try:
+            await paystack.disable_subscription(sub.paystack_subscription_code, sub.paystack_email_token)
+        except Exception as err:
+            logger.warning(f"Paystack disable_subscription failed: {err}")
+
+    sub.status = SUBSCRIPTION_STATUS.CANCELLED
+    await db.commit()
+
+    try:
+        keys = await redis.keys("onyx:session:*")
+        for k in keys:
+            raw = await redis.get(k)
+            if raw and str(user.user_id) in raw.decode():
+                await redis.delete(k)
+    except Exception as err:
+        logger.error(f"Failed to clear Redis session cache on sub cancel: {err}")
+
+    return {"success": True, "message": "Subscription cancelled successfully"}
+
 @router.get("/subscription")
 async def get_subscription(
     user: UserOut = Depends(get_user),

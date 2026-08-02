@@ -7,10 +7,8 @@ const { user } = useAuth()
 const { links, activeLinks, totalClicks, fetchLinks, pending, createLink, copyLink, deleteLink } = useLinks()
 const { domains, fetchDomains } = useDomains()
 
-onMounted(() => {
-  fetchLinks()
-  fetchDomains()
-})
+fetchLinks()
+fetchDomains()
 
 const stats = computed(() => [
   {

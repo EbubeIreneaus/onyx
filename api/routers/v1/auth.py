@@ -4,7 +4,16 @@ import hashlib
 from datetime import datetime, timezone, timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Request, Response, Depends, Header, Cookie, status
+from fastapi import (
+    APIRouter,
+    HTTPException,
+    Request,
+    Response,
+    Depends,
+    Header,
+    Cookie,
+    status,
+)
 from pydantic import EmailStr
 from pwdlib import PasswordHash
 from sqlalchemy import select, func, update
@@ -42,12 +51,13 @@ env = settings.APP_ENV
 cookie_is_secure = True if env == "production" else False
 cookie_domain = f".{settings.DOMAIN_NAME}" if env == "production" else None
 
+
 @router.get("/me", response_model=UserOut)
 async def get_me(current_user: UserOut = Depends(get_user)):
     return current_user
 
-@router.post("/signup", status_code=status.HTTP_201_CREATED)
 
+@router.post("/signup", status_code=status.HTTP_201_CREATED)
 @limiter.limit("25/hour", error_message="Too many requests, try again later")
 async def signup(
     request: Request,
@@ -68,7 +78,7 @@ async def signup(
     hashed_password = password_hash.hash(body.password)
     refresh_token = secrets.token_urlsafe(30)
     r_token_hashed = hashlib.sha256(refresh_token.encode()).hexdigest()
-    
+
     now = datetime.now(timezone.utc)
     access_token_expires_at = now + timedelta(seconds=ACCESS_TOKEN_EXP)
     refresh_token_expires_at = now + timedelta(days=REFRESH_TOKEN_EXP)
@@ -78,8 +88,12 @@ async def signup(
         email=email,
         password=hashed_password,
     )
-    
-    client_ip = x_forwarded_for.split(',')[0].strip() if x_forwarded_for else (request.client.host if request.client else "127.0.0.1")
+
+    client_ip = (
+        x_forwarded_for.split(",")[0].strip()
+        if x_forwarded_for
+        else (request.client.host if request.client else "127.0.0.1")
+    )
 
     new_session = SessionModel(
         user=new_user,
@@ -101,14 +115,13 @@ async def signup(
     }
     token = encode(jwt_payload)
 
-
     response.set_cookie(
         "access_token",
         token,
         expires=access_token_expires_at,
         samesite="lax",
         secure=cookie_is_secure,
-        domain=cookie_domain
+        domain=cookie_domain,
     )
     response.set_cookie(
         "refresh_token",
@@ -117,23 +130,35 @@ async def signup(
         httponly=True,
         samesite="lax",
         secure=cookie_is_secure,
-        domain=cookie_domain
+        domain=cookie_domain,
     )
 
     try:
         session_data = SessionUserSchema.model_validate(new_session).model_dump_json()
-        await redis.set(f"onyx:session:{new_session.session_id}", session_data, ex=ACCESS_TOKEN_EXP)
+        await redis.set(
+            f"onyx:session:{new_session.session_id}", session_data, ex=ACCESS_TOKEN_EXP
+        )
     except Exception as err:
         logger.warning(f"Failed to cache session in Redis for user {email}: {err}")
 
     try:
         arq = await get_arq_pool()
-        await arq.enqueue_job("update_session", str(new_session.session_id), user_agent, _queue_name="onyx")
-        await arq.enqueue_job("send_welcome_email", email, body.fullname, _queue_name="onyx")
+        await arq.enqueue_job(
+            "update_session",
+            str(new_session.session_id),
+            user_agent,
+            _queue_name="onyx",
+        )
+        await arq.enqueue_job(
+            "send_welcome_email", email, body.fullname, _queue_name="onyx"
+        )
     except Exception as err:
-        logger.warning(f"Failed to enqueue signup background jobs for user {email}: {err}")
+        logger.warning(
+            f"Failed to enqueue signup background jobs for user {email}: {err}"
+        )
 
     return {"success": True, "token": token, "refresh_token": refresh_token}
+
 
 @router.post("/signin")
 @limiter.limit("30/hour", error_message="Too many requests, try again later")
@@ -148,9 +173,11 @@ async def signin(
     email = body.email.lower()
     fake_pass = password_hash.hash("fake_password")
 
-    stmt = select(UserModel).options(
-        selectinload(UserModel.current_subscription)
-    ).where(UserModel.email == email)
+    stmt = (
+        select(UserModel)
+        .options(selectinload(UserModel.current_subscription))
+        .where(UserModel.email == email)
+    )
     user = await db.scalar(stmt)
 
     target_hash = user.password if user else fake_pass
@@ -168,7 +195,11 @@ async def signin(
             detail=f"Account status is {user.status.value}",
         )
 
-    client_ip = x_forwarded_for.split(',')[0].strip() if x_forwarded_for else (request.client.host if request.client else "127.0.0.1")
+    client_ip = (
+        x_forwarded_for.split(",")[0].strip()
+        if x_forwarded_for
+        else (request.client.host if request.client else "127.0.0.1")
+    )
     refresh_token = secrets.token_urlsafe(30)
     r_token_hashed = hashlib.sha256(refresh_token.encode()).hexdigest()
 
@@ -202,7 +233,7 @@ async def signin(
         expires=access_token_expires_at,
         samesite="lax",
         secure=cookie_is_secure,
-        domain=cookie_domain
+        domain=cookie_domain,
     )
     response.set_cookie(
         "refresh_token",
@@ -211,22 +242,27 @@ async def signin(
         httponly=True,
         samesite="lax",
         secure=cookie_is_secure,
-        domain=cookie_domain
+        domain=cookie_domain,
     )
 
     try:
         session_data = SessionUserSchema.model_validate(session).model_dump_json()
-        await redis.set(f"onyx:session:{session.session_id}", session_data, ex=ACCESS_TOKEN_EXP)
+        await redis.set(
+            f"onyx:session:{session.session_id}", session_data, ex=ACCESS_TOKEN_EXP
+        )
     except Exception as err:
         logger.warning(f"Failed to cache session in Redis for user {email}: {err}")
 
     try:
         arq = await get_arq_pool()
-        await arq.enqueue_job("update_session", str(session.session_id), user_agent, _queue_name="onyx")
+        await arq.enqueue_job(
+            "update_session", str(session.session_id), user_agent, _queue_name="onyx"
+        )
     except Exception as err:
         logger.warning(f"Failed to enqueue update_session background job: {err}")
 
     return {"success": True, "token": token, "refresh_token": refresh_token}
+
 
 @router.post("/refresh_token")
 @router.post("/refresh-token")
@@ -242,13 +278,12 @@ async def refresh_token(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Missing refresh token",
         )
-    
+
     r_token_hashed = hashlib.sha256(refresh_token.encode()).hexdigest()
     stmt = (
         select(SessionModel)
         .options(
-            selectinload(SessionModel.user)
-            .selectinload(UserModel.current_subscription)
+            selectinload(SessionModel.user).selectinload(UserModel.current_subscription)
         )
         .where(SessionModel.refresh_token == r_token_hashed)
     )
@@ -289,7 +324,7 @@ async def refresh_token(
         expires=access_token_expires_at,
         samesite="lax",
         secure=cookie_is_secure,
-        domain=cookie_domain
+        domain=cookie_domain,
     )
     response.set_cookie(
         "refresh_token",
@@ -298,16 +333,19 @@ async def refresh_token(
         httponly=True,
         samesite="lax",
         secure=cookie_is_secure,
-        domain=cookie_domain
+        domain=cookie_domain,
     )
 
     try:
         session_data = SessionUserSchema.model_validate(session).model_dump_json()
-        await redis.set(f"onyx:session:{session.session_id}", session_data, ex=ACCESS_TOKEN_EXP)
+        await redis.set(
+            f"onyx:session:{session.session_id}", session_data, ex=ACCESS_TOKEN_EXP
+        )
     except Exception as err:
         logger.warning(f"Failed to update session in Redis on refresh: {err}")
 
     return {"success": True, "token": token, "refresh_token": new_refresh_token}
+
 
 @router.post("/signout")
 @router.post("/logout")
@@ -333,6 +371,7 @@ async def signout(
     response.delete_cookie("refresh_token", path="/")
     return {"success": True}
 
+
 @router.post("/change-password")
 @limiter.limit("20/hour", error_message="Too many attempts, try again later")
 async def change_password(
@@ -357,6 +396,7 @@ async def change_password(
     await db.commit()
     return {"success": True}
 
+
 @router.post("/send-reset-link")
 @limiter.limit("5/minute", error_message="Too many requests, try again later")
 async def send_reset_link(
@@ -379,11 +419,16 @@ async def send_reset_link(
     long_url = secrets.token_urlsafe(32)
     reset_token = f"{key_url}-onyx-{long_url}"
     payload = json.dumps({"email": email, "key": long_url})
-    
-    client_ip = x_forwarded_for.split(',')[0].strip() if x_forwarded_for else (request.client.host if request.client else "127.0.0.1")
+
+    client_ip = (
+        x_forwarded_for.split(",")[0].strip()
+        if x_forwarded_for
+        else (request.client.host if request.client else "127.0.0.1")
+    )
     await redis.set(f"onyx:passwordReset:{client_ip}:{key_url}", payload, ex=3600)
-    
+
     return {"success": True, "reset_token": reset_token}
+
 
 @router.get("/verify-reset-token")
 @router.get("/validate-reset-link")
@@ -399,7 +444,11 @@ async def verify_reset_token(
             detail="Invalid reset token format",
         )
     key_url, long_url = parts[0], parts[1]
-    client_ip = x_forwarded_for.split(',')[0].strip() if x_forwarded_for else (request.client.host if request.client else "127.0.0.1")
+    client_ip = (
+        x_forwarded_for.split(",")[0].strip()
+        if x_forwarded_for
+        else (request.client.host if request.client else "127.0.0.1")
+    )
 
     result = await redis.get(f"onyx:passwordReset:{client_ip}:{key_url}")
     if not result:
@@ -417,6 +466,7 @@ async def verify_reset_token(
 
     return {"success": True}
 
+
 @router.post("/reset-password")
 async def reset_password(
     request: Request,
@@ -431,7 +481,11 @@ async def reset_password(
             detail="Invalid token format",
         )
     key_url, long_url = parts[0], parts[1]
-    client_ip = x_forwarded_for.split(',')[0].strip() if x_forwarded_for else (request.client.host if request.client else "127.0.0.1")
+    client_ip = (
+        x_forwarded_for.split(",")[0].strip()
+        if x_forwarded_for
+        else (request.client.host if request.client else "127.0.0.1")
+    )
 
     result = await redis.get(f"onyx:passwordReset:{client_ip}:{key_url}")
     if not result:

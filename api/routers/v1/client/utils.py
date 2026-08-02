@@ -10,10 +10,30 @@ def parse_int_limit(value: Any, default: int = 0) -> int:
     except (ValueError, TypeError):
         return default
 
+from datetime import datetime, timezone
+
 def get_user_permissions_and_limits(user: UserManage) -> Tuple[Set[Any], Dict[str, int]]:
     permissions: Set[Any] = set()
-    if user.current_subscription and user.current_subscription.tier:
-        tier = user.current_subscription.tier
+    sub = user.current_subscription
+    now = datetime.now(timezone.utc)
+
+    sub_valid = False
+    if sub and sub.tier:
+        exp_dt = sub.expired_at
+        if exp_dt:
+            if isinstance(exp_dt, str):
+                try:
+                    exp_dt = datetime.fromisoformat(exp_dt)
+                except Exception:
+                    exp_dt = None
+            if exp_dt:
+                if exp_dt.tzinfo is None:
+                    exp_dt = exp_dt.replace(tzinfo=timezone.utc)
+                if exp_dt > now:
+                    sub_valid = True
+
+    if sub_valid and sub and sub.tier:
+        tier = sub.tier
         raw_perms = tier.permissions or []
         for p in raw_perms:
             val = p.value if hasattr(p, "value") else str(p)

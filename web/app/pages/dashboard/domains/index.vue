@@ -5,9 +5,7 @@ useSeoMeta({ title: 'Domains — Onyx' })
 
 const { domains, verifiedDomains, pendingDomains, fetchDomains, createDomain, deleteDomain, pending } = useDomains()
 
-onMounted(() => {
-  fetchDomains()
-})
+fetchDomains()
 
 const showModal = ref(false)
 const newDomain = ref('')
@@ -39,9 +37,13 @@ function formatDate(d: string) {
           Register and verify custom domains for branded short links.
         </p>
       </div>
-      <UButton icon="i-lucide-plus" size="sm" @click="showModal = true">
-        Add domain
-      </UButton>
+      <PermissionButton
+        permission="custom:domain"
+        label="Add domain"
+        icon="i-lucide-plus"
+        size="sm"
+        @click="showModal = true"
+      />
     </div>
 
     <!-- Stats -->
@@ -72,7 +74,12 @@ function formatDate(d: string) {
       </div>
       <p class="text-lg font-semibold text-slate-900 dark:text-white mb-1">No domains registered</p>
       <p class="text-slate-500 text-sm mb-5">Add a custom domain to create branded short links.</p>
-      <UButton icon="i-lucide-plus" @click="showModal = true">Add domain</UButton>
+      <PermissionButton
+        permission="custom:domain"
+        label="Add domain"
+        icon="i-lucide-plus"
+        @click="showModal = true"
+      />
     </div>
 
     <!-- Domains list -->
@@ -104,20 +111,16 @@ function formatDate(d: string) {
         <!-- Status badges -->
         <div class="flex items-center gap-2 shrink-0">
           <UBadge
-            :color="domain.txt_verified ? 'success' : 'warning'"
+            :color="domain.txt_verified && domain.cname_verified ? 'success' : 'error'"
             variant="soft"
             size="sm"
+            class="capitalize font-medium"
           >
-            <UIcon :name="domain.txt_verified ? 'i-lucide-check' : 'i-lucide-clock'" class="w-3 h-3 mr-1" />
-            TXT {{ domain.txt_verified ? 'Verified' : 'Pending' }}
-          </UBadge>
-          <UBadge
-            :color="domain.cname_verified ? 'success' : 'neutral'"
-            variant="soft"
-            size="sm"
-            class="hidden sm:flex"
-          >
-            CNAME {{ domain.cname_verified ? 'OK' : 'Pending' }}
+            <UIcon
+              :name="domain.txt_verified && domain.cname_verified ? 'i-lucide-check-circle-2' : 'i-lucide-alert-circle'"
+              class="w-3.5 h-3.5 mr-1 shrink-0"
+            />
+            {{ domain.txt_verified && domain.cname_verified ? 'Verified' : 'Unverified' }}
           </UBadge>
         </div>
 
@@ -130,33 +133,6 @@ function formatDate(d: string) {
           class="opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
           @click="deleteDomain(domain.id)"
         />
-      </div>
-    </div>
-
-    <!-- DNS instructions card (for unverified domains) -->
-    <div v-if="pendingDomains.length" class="mt-6 p-5 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40">
-      <div class="flex items-start gap-3">
-        <UIcon name="i-lucide-info" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-        <div>
-          <p class="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-2">DNS Verification Instructions</p>
-          <p class="text-xs text-amber-700 dark:text-amber-400 mb-3 leading-relaxed">
-            To verify your domain, add the following TXT record to your DNS provider, then wait up to 24 hours for propagation.
-          </p>
-          <div class="font-mono text-xs bg-amber-100 dark:bg-amber-900/30 rounded-lg p-3 space-y-1.5">
-            <div class="flex gap-4">
-              <span class="text-amber-600 font-semibold w-14">Type:</span>
-              <span class="text-amber-900 dark:text-amber-200">TXT</span>
-            </div>
-            <div class="flex gap-4">
-              <span class="text-amber-600 font-semibold w-14">Name:</span>
-              <span class="text-amber-900 dark:text-amber-200">@</span>
-            </div>
-            <div class="flex gap-4">
-              <span class="text-amber-600 font-semibold w-14">Value:</span>
-              <span class="text-amber-900 dark:text-amber-200">onyx-verify-[your-token]</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
 

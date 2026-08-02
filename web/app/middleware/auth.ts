@@ -1,9 +1,9 @@
-// Protect all /dashboard routes — await session initialization before redirecting
+// Protect all /dashboard routes — redirect to /login if not authenticated
 export default defineNuxtRouteMiddleware(async (_to) => {
-  const { isAuthenticated, initialized, restore } = useAuth()
+  const { isAuthenticated, fetchUser } = useAuth()
 
-  if (!initialized.value) {
-    await restore()
+  if (!isAuthenticated.value) {
+    await fetchUser()
   }
 
   if (!isAuthenticated.value) {
