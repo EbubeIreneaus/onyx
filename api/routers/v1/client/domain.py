@@ -83,14 +83,14 @@ async def create_domain(
                 detail=f"Maximum custom domains limit ({limits['max_custom_domains']}) reached for your tier",
             )
 
-        txt_token = f"onyx-domain-verification={secrets.token_urlsafe(16)}"
-        redis_key = f"onyx:txt_dns_verify:{user.user_id}:{domain_name}"
-        await redis.set(redis_key, txt_token, ex=86400)
+        import tldextract
+        is_root = bool(not tldextract.extract(domain_name).subdomain)
+        txt_token = f"onyx-domain-verification={secrets.token_urlsafe(16)}" if is_root else None
 
         new_domain = DomainModel(
             name=domain_name,
             user_id=user.user_id,
-            txt_verified=False,
+            txt_verified=not is_root,
             cname_verified=False,
             txt_token=txt_token,
         )
@@ -271,3 +271,151 @@ async def delete_domain(
     await db.delete(domain_obj)
     await db.commit()
     return {"success": True, "detail": "Domain deleted successfully"}
+
+import dns.resolver
+import tldextract
+
+def get_authoritative_resolver(domain_name: str):
+    ext = tldextract.extract(domain_name)
+    root_domain = ext.top_domain_under_public_suffix if ext.top_domain_under_public_suffix else domain_name
+    res = dns.resolver.Resolver()
+    res.timeout = 4.0
+    res.lifetime = 4.0
+    try:
+        ns_answers = dns.resolver.resolve(root_domain, 'NS')
+        ns_ips = []
+        for ns in ns_answers:
+            try:
+                ip_answers = dns.resolver.resolve(str(ns.target), 'A')
+                for ip in ip_answers:
+                    ns_ips.append(str(ip))
+            except Exception:
+                pass
+        if ns_ips:
+            res.nameservers = ns_ips
+    except Exception:
+        pass
+    return res, root_domain
+
+@router.post("/domains/{domain_id}/verify-dns")
+async def verify_domain_dns(
+    domain_id: int,
+    record_type: str,
+    user: UserOut = Depends(get_user),
+    db: AsyncSession = Depends(get_db),
+):
+    permissions, _ = get_user_permissions_and_limits(user)
+    if AppPermission.CUSTOM_DOMAIN not in permissions and AppPermission.CUSTOM_DOMAIN.value not in permissions:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Subscription tier does not allow custom domain verification",
+        )
+
+    domain_obj = await db.scalar(
+        select(DomainModel).where(DomainModel.id == domain_id, DomainModel.user_id == user.user_id)
+    )
+    if not domain_obj:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Domain not found")
+
+    rec_type = record_type.lower().strip()
+    if rec_type not in ("txt", "cname"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="record_type parameter must be either 'txt' or 'cname'",
+        )
+
+    resolver, root_domain = get_authoritative_resolver(domain_obj.name)
+
+    if rec_type == "txt":
+        if domain_obj.txt_verified:
+            return {"success": True, "txt_verified": True, "message": "TXT record is already verified"}
+
+        if not domain_obj.txt_token:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No TXT verification token generated for this domain")
+
+        try:
+            try:
+                answers = resolver.resolve(domain_obj.name, "TXT")
+            except Exception:
+                sys_res = dns.resolver.Resolver()
+                sys_res.timeout = 4.0
+                sys_res.lifetime = 4.0
+                answers = sys_res.resolve(domain_obj.name, "TXT")
+
+            found = False
+            for rdata in answers:
+                for txt_string in rdata.strings:
+                    decoded = txt_string.decode("utf-8", errors="ignore")
+                    if domain_obj.txt_token in decoded or decoded in domain_obj.txt_token:
+                        found = True
+                        break
+                if found:
+                    break
+
+            if not found:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"TXT record containing '{domain_obj.txt_token}' was not found for domain {domain_obj.name}",
+                )
+
+            domain_obj.txt_verified = True
+            await db.commit()
+            await db.refresh(domain_obj)
+            return {"success": True, "txt_verified": True, "message": "TXT record verified successfully!"}
+
+        except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.resolver.NoNameservers, dns.resolver.Timeout) as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"DNS query failed or TXT record not propagated yet: {str(e)}",
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Could not verify TXT record: {str(e)}",
+            )
+
+    elif rec_type == "cname":
+        if domain_obj.cname_verified:
+            return {"success": True, "cname_verified": True, "message": "CNAME record is already verified"}
+
+        target_host = settings.DOMAIN_NAME.lower().strip()
+
+        try:
+            try:
+                answers = resolver.resolve(domain_obj.name, "CNAME")
+            except Exception:
+                sys_res = dns.resolver.Resolver()
+                sys_res.timeout = 4.0
+                sys_res.lifetime = 4.0
+                answers = sys_res.resolve(domain_obj.name, "CNAME")
+
+            found = False
+            for rdata in answers:
+                cname_target = str(rdata.target).rstrip(".").lower()
+                if target_host in cname_target:
+                    found = True
+                    break
+
+            if not found:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"CNAME record pointing to '{target_host}' was not found for domain {domain_obj.name}",
+                )
+
+            domain_obj.cname_verified = True
+            if not domain_obj.is_root_domain:
+                domain_obj.txt_verified = True
+            await db.commit()
+            await db.refresh(domain_obj)
+            return {"success": True, "cname_verified": True, "message": "CNAME record verified successfully!"}
+
+        except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.resolver.NoNameservers, dns.resolver.Timeout) as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"DNS query failed or CNAME record not propagated yet: {str(e)}",
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Could not verify CNAME record: {str(e)}",
+            )

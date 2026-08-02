@@ -29,4 +29,6 @@ class DomainResponse(BaseModel):
     txt_verified: bool
     cname_verified: bool
     txt_token: Optional[str] = None
+    is_root_domain: bool = True
+    subdomain_prefix: str = "@"
     created_at: datetime

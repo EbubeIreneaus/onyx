@@ -5,6 +5,7 @@ export interface DomainOut {
   txt_verified: boolean
   cname_verified: boolean
   txt_token?: string | null
+  is_root_domain?: boolean
   created_at: string
 }
 
@@ -96,8 +97,8 @@ export const useDomains = () => {
     }
   }
 
-  const verifiedDomains = computed(() => domains.value.filter(d => d.txt_verified))
-  const pendingDomains = computed(() => domains.value.filter(d => !d.txt_verified))
+  const verifiedDomains = computed(() => domains.value.filter(d => (d.is_root_domain !== false ? d.txt_verified : true) && d.cname_verified))
+  const pendingDomains = computed(() => domains.value.filter(d => !((d.is_root_domain !== false ? d.txt_verified : true) && d.cname_verified)))
 
   return {
     domains: readonly(domains),

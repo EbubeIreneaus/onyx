@@ -4,9 +4,44 @@ from permission import AppPermission
 from setting import settings
 from libs.logger import logger
 
-def parse_int_limit(value: Any, default: int = 0) -> int:
-    try:
+import math
+
+class UnlimitedLimit:
+    def __ge__(self, other): return False
+    def __gt__(self, other): return False
+    def __le__(self, other): return False
+    def __lt__(self, other): return False
+    def __rge__(self, other): return False
+    def __rgt__(self, other): return False
+    def __rle__(self, other): return False
+    def __rlt__(self, other): return False
+    def __eq__(self, other):
+        if isinstance(other, str):
+            return other.lower() in ('unlimited', 'forever', 'infinite')
+        return False
+    def __str__(self): return 'unlimited'
+    def __repr__(self): return 'unlimited'
+    def __format__(self, format_spec): return 'unlimited'
+    def __int__(self): return 999_999_999
+
+UNLIMITED = UnlimitedLimit()
+
+def parse_int_limit(value: Any, default: Any = 0) -> Any:
+    if value is None:
+        return default
+    if isinstance(value, str):
+        val_str = value.strip().lower()
+        if val_str in ('unlimited', 'forever', 'infinite', '-1', 'inf', 'infinity'):
+            return UNLIMITED
+    if isinstance(value, (int, float)):
+        if value < 0 or math.isinf(value):
+            return UNLIMITED
         return int(value)
+    try:
+        val_int = int(value)
+        if val_int < 0:
+            return UNLIMITED
+        return val_int
     except (ValueError, TypeError):
         return default
 

@@ -64,10 +64,10 @@ async def create_short_link(
                 detail="You do not own this domain",
             )
 
-        if not domain_obj.txt_verified:
+        if not (domain_obj.txt_verified or domain_obj.cname_verified):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Domain TXT record verification must be completed before creating short links",
+                detail="Domain DNS verification must be completed before creating short links",
             )
 
         is_subdomain = target_domain.endswith(settings.DOMAIN_NAME)
@@ -123,11 +123,27 @@ async def create_short_link(
         )
 
     durability_days = limits.get("link_durability", 14)
-    max_expired_on = datetime.now(timezone.utc) + timedelta(days=durability_days)
+    is_unlimited_durability = (
+        durability_days == "unlimited"
+        or durability_days == "forever"
+        or type(durability_days).__name__ == "UnlimitedLimit"
+    )
+
+    if is_unlimited_durability:
+        max_expired_on = None
+    else:
+        try:
+            days_int = int(durability_days)
+            max_expired_on = datetime.now(timezone.utc) + timedelta(days=days_int)
+        except Exception:
+            max_expired_on = None
 
     if body.expired_on:
         req_expired = body.expired_on if body.expired_on.tzinfo else body.expired_on.replace(tzinfo=timezone.utc)
-        expired_on = min(req_expired, max_expired_on)
+        if max_expired_on:
+            expired_on = min(req_expired, max_expired_on)
+        else:
+            expired_on = req_expired
     else:
         expired_on = max_expired_on
 
@@ -245,3 +261,140 @@ async def delete_redirect(
     await db.delete(r)
     await db.commit()
     return {"success": True, "detail": "Redirect deleted"}
+
+import json
+from typing import Annotated
+from fastapi import Request, Header
+from libs.redis import redis
+from libs.logger import logger
+from schemas.redirect import RedirectResolveRequest, RedirectResolveResponse
+from models.user import User, Subscription
+
+@router.post("/resolve-redirect", response_model=RedirectResolveResponse)
+async def resolve_redirect(
+    request: Request,
+    body: RedirectResolveRequest,
+    db: AsyncSession = Depends(get_db),
+    user_agent: Annotated[str | None, Header()] = None,
+    x_forwarded_for: Annotated[str | None, Header()] = None,
+):
+    from workers.config import get_arq_pool
+    raw_domain = body.domain.lower().strip() if body.domain else ""
+    slug = (body.slug or "").strip().lstrip('/')
+
+    if body.full_url:
+        try:
+            from urllib.parse import urlparse
+            parsed = urlparse(body.full_url)
+            if parsed.netloc:
+                raw_domain = parsed.netloc.lower().split(':')[0]
+            if not slug and parsed.path:
+                slug = parsed.path.strip('/')
+        except Exception:
+            pass
+
+    domain = raw_domain if raw_domain else settings.DOMAIN_NAME
+    redis_key = f"onyx:redirect:{domain}:{slug}"
+
+    client_ip = "127.0.0.1"
+    if x_forwarded_for:
+        client_ip = x_forwarded_for.split(',')[0].strip()
+    elif request.client:
+        client_ip = request.client.host
+
+    ua = user_agent or "Unknown"
+
+    cached_data = None
+    try:
+        cached_raw = await redis.get(redis_key)
+        if cached_raw:
+            cached_data = json.loads(cached_raw)
+    except Exception as err:
+        logger.warning(f"Redis lookup error for redirect {redis_key}: {err}")
+
+    now = datetime.now(timezone.utc)
+
+    if cached_data:
+        is_expired = cached_data.get("expired", False)
+        exp_str = cached_data.get("expired_on")
+        if exp_str:
+            try:
+                exp_dt = datetime.fromisoformat(exp_str)
+                if exp_dt.tzinfo is None:
+                    exp_dt = exp_dt.replace(tzinfo=timezone.utc)
+                if exp_dt <= now:
+                    is_expired = True
+            except Exception:
+                pass
+
+        if is_expired:
+            return RedirectResolveResponse(found=False, expired=True, message="Link has expired")
+
+        redirect_id_str = cached_data.get("redirect_id")
+        destination = cached_data.get("destination")
+
+        if redirect_id_str:
+            try:
+                arq = await get_arq_pool()
+                await arq.enqueue_job(
+                    "log_redirect_visitor_task",
+                    redirect_id_str,
+                    client_ip,
+                    ua,
+                    _queue_name="onyx"
+                )
+            except Exception as err:
+                logger.warning(f"Failed to enqueue visitor tracking job: {err}")
+
+        return RedirectResolveResponse(found=True, destination=destination, expired=False)
+
+    stmt = (
+        select(RedirectModel)
+        .options(selectinload(RedirectModel.user).selectinload(User.current_subscription).selectinload(Subscription.tier))
+        .where(
+            RedirectModel.domain == domain,
+            RedirectModel.slug == slug,
+        )
+    )
+    redirect_obj = await db.scalar(stmt)
+
+    if not redirect_obj:
+        return RedirectResolveResponse(found=False, expired=False, message="Short link not found")
+
+    is_expired = redirect_obj.expired
+    if redirect_obj.expired_on:
+        exp_dt = redirect_obj.expired_on
+        if exp_dt.tzinfo is None:
+            exp_dt = exp_dt.replace(tzinfo=timezone.utc)
+        if exp_dt <= now:
+            is_expired = True
+            redirect_obj.expired = True
+            await db.commit()
+
+    if is_expired:
+        return RedirectResolveResponse(found=False, expired=True, message="Short link has expired")
+
+    try:
+        cache_payload = {
+            "redirect_id": str(redirect_obj.redirect_id),
+            "destination": redirect_obj.destination,
+            "expired": redirect_obj.expired,
+            "expired_on": redirect_obj.expired_on.isoformat() if redirect_obj.expired_on else None,
+        }
+        await redis.set(redis_key, json.dumps(cache_payload), ex=3600)
+    except Exception as err:
+        logger.warning(f"Failed to cache redirect in Redis: {err}")
+
+    try:
+        arq = await get_arq_pool()
+        await arq.enqueue_job(
+            "log_redirect_visitor_task",
+            str(redirect_obj.redirect_id),
+            client_ip,
+            ua,
+            _queue_name="onyx"
+        )
+    except Exception as err:
+        logger.warning(f"Failed to enqueue visitor tracking job: {err}")
+
+    return RedirectResolveResponse(found=True, destination=redirect_obj.destination, expired=False)

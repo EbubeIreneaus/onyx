@@ -36,3 +36,14 @@ class RedirectResponse(BaseModel):
     created_at: datetime
     updated_at: Optional[datetime] = None
     visitor_count: Optional[int] = 0
+
+class RedirectResolveRequest(BaseModel):
+    domain: str
+    slug: Optional[str] = None
+    full_url: Optional[str] = None
+
+class RedirectResolveResponse(BaseModel):
+    found: bool
+    destination: Optional[str] = None
+    expired: bool = False
+    message: Optional[str] = None

@@ -34,26 +34,54 @@ async function handleDelete() {
 const verifyingTxt = ref(false)
 const verifyingCname = ref(false)
 const toast = useToast()
+const api = useApi()
 
 async function handleVerifyTxt() {
   if (!domain.value || domain.value.txt_verified) return
   verifyingTxt.value = true
-  toast.add({ title: 'Checking TXT DNS record...', color: 'info' })
-  setTimeout(() => {
-    toast.add({ title: 'Verification pending', description: 'TXT record propagation can take a few minutes.', color: 'warning' })
+  try {
+    const res = await api<{ success: boolean; txt_verified: boolean; message: string }>(`/api/v1/client/domains/${domain.value.id}/verify-dns?record_type=txt`, {
+      method: 'POST',
+    })
+    if (res.txt_verified) {
+      domain.value.txt_verified = true
+      toast.add({ title: 'Verified!', description: res.message || 'TXT record verified successfully!', color: 'success' })
+    }
+  }
+  catch (err: any) {
+    const msg = err?.data?.detail || 'TXT record DNS check failed or not propagated yet.'
+    toast.add({ title: 'Verification Pending', description: msg, color: 'error' })
+  }
+  finally {
     verifyingTxt.value = false
-  }, 1200)
+  }
 }
 
 async function handleVerifyCname() {
   if (!domain.value || domain.value.cname_verified) return
   verifyingCname.value = true
-  toast.add({ title: 'Checking CNAME DNS record...', color: 'info' })
-  setTimeout(() => {
-    toast.add({ title: 'Verification pending', description: 'CNAME record propagation can take a few minutes.', color: 'warning' })
+  try {
+    const res = await api<{ success: boolean; cname_verified: boolean; message: string }>(`/api/v1/client/domains/${domain.value.id}/verify-dns?record_type=cname`, {
+      method: 'POST',
+    })
+    if (res.cname_verified) {
+      domain.value.cname_verified = true
+      toast.add({ title: 'Verified!', description: res.message || 'CNAME record verified successfully!', color: 'success' })
+    }
+  }
+  catch (err: any) {
+    const msg = err?.data?.detail || 'CNAME record DNS check failed or not propagated yet.'
+    toast.add({ title: 'Verification Pending', description: msg, color: 'error' })
+  }
+  finally {
     verifyingCname.value = false
-  }, 1200)
+  }
 }
+
+const subdomainPrefix = computed(() => {
+  if (!domain.value) return '@'
+  return domain.value.subdomain_prefix || '@'
+})
 
 useSeoMeta({ title: computed(() => domain.value ? `${domain.value.name} — Verification` : 'Domain Details') })
 </script>
@@ -114,8 +142,8 @@ useSeoMeta({ title: computed(() => domain.value ? `${domain.value.name} — Veri
         </UButton>
       </div>
 
-      <!-- Banner 1: TXT Record Verification -->
       <div
+        v-if="domain.is_root_domain !== false"
         class="p-6 rounded-2xl border transition-all space-y-4"
         :class="domain.txt_verified
           ? 'bg-emerald-50/70 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/40 text-emerald-900 dark:text-emerald-200'
@@ -223,12 +251,12 @@ useSeoMeta({ title: computed(() => domain.value ? `${domain.value.name} — Veri
           </div>
           <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
             <span class="w-20 text-slate-400 font-sans font-medium uppercase text-[10px] tracking-wider">Host / Name</span>
-            <span class="font-semibold">@ (or subdomain)</span>
+            <span class="font-semibold select-all">{{ subdomainPrefix }} <span class="font-sans text-slate-400 font-normal ml-1">(or {{ domain.name }})</span></span>
           </div>
           <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
             <span class="w-20 text-slate-400 font-sans font-medium uppercase text-[10px] tracking-wider">Target Value</span>
             <span class="select-all font-semibold break-all text-zinc-900 dark:text-zinc-100">
-              https://{{ defaultDomain }}
+              {{ defaultDomain }}
             </span>
           </div>
         </div>

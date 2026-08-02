@@ -27,6 +27,17 @@ class Domain(Base):
     txt_token: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
+    @property
+    def is_root_domain(self) -> bool:
+        import tldextract
+        return bool(not tldextract.extract(self.name).subdomain)
+
+    @property
+    def subdomain_prefix(self) -> str:
+        import tldextract
+        sub = tldextract.extract(self.name).subdomain
+        return sub if sub else "@"
+
 class Redirect(Base):
     __tablename__ = "redirects"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
