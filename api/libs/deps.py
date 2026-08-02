@@ -80,40 +80,24 @@ async def get_user(
             detail="Invalid token payload",
         )
 
-    session_raw = await redis.get(f"onyx:session:{session_id}")
-    session_data = None
     now = datetime.now(timezone.utc)
+    s = await db.scalar(
+        select(Session)
+        .options(
+            selectinload(Session.user)
+            .selectinload(User.current_subscription)
+            .selectinload(Subscription.tier)
+        )
+        .where(Session.session_id == session_id, Session.expires_at > now.replace(tzinfo=None))
+    )
 
-    if session_raw:
-        session_data = SessionUserSchema.model_validate_json(session_raw)
-    else:
-        s = await db.scalar(
-            select(Session)
-            .options(
-                selectinload(Session.user)
-                .selectinload(User.current_subscription)
-                .selectinload(Subscription.tier)
-            )
-            .where(Session.session_id == session_id, Session.expires_at > now.replace(tzinfo=None))
+    if not s or not s.user:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid or expired session",
         )
 
-        if not s:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Invalid or expired session",
-            )
-
-        session_data = SessionUserSchema.model_validate(s)
-        try:
-            json_session = session_data.model_dump_json()
-            time_left = s.expires_at.replace(tzinfo=timezone.utc) - now if s.expires_at.tzinfo is None else s.expires_at - now
-            seconds_left = int(time_left.total_seconds())
-            if seconds_left > 0:
-                await redis.set(f"onyx:session:{session_id}", json_session, ex=seconds_left)
-        except Exception as err:
-            logger.warning(f"Failed to cache session in Redis: {err}")
-
-    user = session_data.user
+    user = UserManage.model_validate(s.user)
 
     if user.status != USER_STATUS.ACTIVE:
         raise HTTPException(
@@ -126,6 +110,7 @@ async def get_user(
 async def get_admin(
     user: UserManage = Depends(get_user),
 ) -> UserOut:
+    print("is admin: ", user.is_admin)
     if not user.is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

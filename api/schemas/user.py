@@ -80,13 +80,13 @@ class UserOut(BaseModel):
     email: EmailStr
     status: USER_STATUS
     email_verified: bool
+    is_admin: Optional[bool] = False
+    admin_priviledges: Optional[List[AdminPermission]] = None
     created_at: datetime
     current_subscription: Optional[SubscriptionOut] = None
 
 class UserManage(UserOut):
     model_config = ConfigDict(from_attributes=True)
-    is_admin: bool
-    admin_priviledges: Optional[List[AdminPermission]] = None
 
 class SessionUserSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)

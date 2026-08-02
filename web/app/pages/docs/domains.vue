@@ -34,14 +34,14 @@ const baseApiUrl = computed(() => config.public.apiBase || 'http://localhost:800
 
       <div class="space-y-2">
         <h4 class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Request Body (JSON)</h4>
-        <pre class="p-3 bg-zinc-950 rounded-lg text-xs text-emerald-400 font-mono">{
+        <pre class="p-3 bg-zinc-950 rounded-lg text-xs text-emerald-400 font-mono overflow-x-auto max-w-full block">{
   "name": "brand.com" // or "links.brand.com"
 }</pre>
       </div>
 
       <div class="space-y-2">
         <h4 class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Expected Response (201 Created)</h4>
-        <pre class="p-3 bg-zinc-950 rounded-lg text-xs text-emerald-400 font-mono">{
+        <pre class="p-3 bg-zinc-950 rounded-lg text-xs text-emerald-400 font-mono overflow-x-auto max-w-full block">{
   "id": 12,
   "name": "brand.com",
   "txt_token": "onyx-verify-3a9f8b2...",
@@ -71,7 +71,7 @@ const baseApiUrl = computed(() => config.public.apiBase || 'http://localhost:800
 
       <div class="space-y-2">
         <h4 class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Expected Response (200 OK)</h4>
-        <pre class="p-3 bg-zinc-950 rounded-lg text-xs text-emerald-400 font-mono">{
+        <pre class="p-3 bg-zinc-950 rounded-lg text-xs text-emerald-400 font-mono overflow-x-auto max-w-full block">{
   "success": true,
   "cname_verified": true,
   "message": "CNAME record verified successfully!"
@@ -89,7 +89,7 @@ const baseApiUrl = computed(() => config.public.apiBase || 'http://localhost:800
 
       <div class="space-y-2">
         <h4 class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Expected Response (200 OK)</h4>
-        <pre class="p-3 bg-zinc-950 rounded-lg text-xs text-emerald-400 font-mono">[
+        <pre class="p-3 bg-zinc-950 rounded-lg text-xs text-emerald-400 font-mono overflow-x-auto max-w-full block">[
   {
     "id": 12,
     "name": "brand.com",

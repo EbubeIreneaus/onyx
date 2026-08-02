@@ -1,5 +1,26 @@
 *.env
 *.venv
 
-/web/node_modules
+
+
+# Nuxt dev/build outputs
+/web/.output
+/web/.data
 /web/.nuxt
+/web/.nitro
+/web/.cache
+dist
+
+# Node dependencies
+/web/node_modules
+
+
+# Misc
+.DS_Store
+.fleet
+.idea
+
+# Local env files
+.env
+.env.*
+!.env.example

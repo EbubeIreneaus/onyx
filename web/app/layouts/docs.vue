@@ -129,3 +129,13 @@ watch(() => route.path, () => {
 .fade-enter-active, .fade-leave-active { transition: opacity 0.2s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>
+
+<style>
+main pre {
+  overflow-x: auto !important;
+  max-width: 100% !important;
+  white-space: pre !important;
+  word-break: normal !important;
+  word-wrap: normal !important;
+}
+</style>

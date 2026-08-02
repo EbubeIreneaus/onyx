@@ -34,7 +34,7 @@ const baseApiUrl = computed(() => config.public.apiBase || 'http://localhost:800
 
       <div class="space-y-2">
         <h4 class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Request Body (JSON)</h4>
-        <pre class="p-3 bg-zinc-950 rounded-lg text-xs text-emerald-400 font-mono">{
+        <pre class="p-3 bg-zinc-950 rounded-lg text-xs text-emerald-400 font-mono overflow-x-auto max-w-full block">{
   "destination": "https://example.com/long-page-target",
   "domain": "onyx.com", // Optional: verified custom domain or default domain
   "slug": "promo2026"   // Optional: custom slug (cleaned automatically)
@@ -43,7 +43,7 @@ const baseApiUrl = computed(() => config.public.apiBase || 'http://localhost:800
 
       <div class="space-y-2">
         <h4 class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Expected Response (200 OK)</h4>
-        <pre class="p-3 bg-zinc-950 rounded-lg text-xs text-emerald-400 font-mono">{
+        <pre class="p-3 bg-zinc-950 rounded-lg text-xs text-emerald-400 font-mono overflow-x-auto max-w-full block">{
   "id": "7a9f8b2c-1234-5678-90ab-cdef12345678",
   "destination": "https://example.com/long-page-target",
   "domain": "onyx.com",
@@ -73,7 +73,7 @@ const baseApiUrl = computed(() => config.public.apiBase || 'http://localhost:800
 
       <div class="space-y-2">
         <h4 class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Expected Response (200 OK)</h4>
-        <pre class="p-3 bg-zinc-950 rounded-lg text-xs text-emerald-400 font-mono">{
+        <pre class="p-3 bg-zinc-950 rounded-lg text-xs text-emerald-400 font-mono overflow-x-auto max-w-full block">{
   "redirect_id": "7a9f8b2c-1234-5678-90ab-cdef12345678",
   "domain": "onyx.com",
   "slug": "promo2026",
@@ -105,7 +105,7 @@ const baseApiUrl = computed(() => config.public.apiBase || 'http://localhost:800
 
       <div class="space-y-2">
         <h4 class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Request Body (JSON)</h4>
-        <pre class="p-3 bg-zinc-950 rounded-lg text-xs text-emerald-400 font-mono">{
+        <pre class="p-3 bg-zinc-950 rounded-lg text-xs text-emerald-400 font-mono overflow-x-auto max-w-full block">{
   "domain": "onyx.com",
   "slug": "promo2026",
   "full_url": "https://onyx.com/promo2026"
