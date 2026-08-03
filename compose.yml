@@ -9,7 +9,7 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - DB_URL=postgresql+asyncpg://onyx:onyx@postgres:5432/onyx
     env_file:
-      - /api/.env
+      - ./api/.env
     volumes:
       - ./api:/app
     depends_on:
@@ -26,7 +26,7 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - DB_URL=postgresql+asyncpg://onyx:onyx@postgres:5432/onyx
     env_file:
-      - /api/.env
+      - ./api/.env
     volumes:
       - ./api:/app
     depends_on:
