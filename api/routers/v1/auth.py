@@ -39,6 +39,7 @@ from libs.limiter import limiter
 from setting import settings
 from workers.config import get_arq_pool
 from libs.logger import logger
+from libs.setup import assign_free_tier_to_user
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -104,6 +105,7 @@ async def signup(
     )
 
     db.add_all([new_user, new_session])
+    await assign_free_tier_to_user(db, new_user)
     await db.commit()
 
     jwt_payload = {

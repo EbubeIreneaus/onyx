@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import {availablePermissions} from '@/libs/permission'
+
 definePageMeta({
   layout: 'admin',
   middleware: ['auth'],
@@ -7,6 +9,7 @@ definePageMeta({
 useSeoMeta({
   title: 'Manage Tiers & Pricing — Admin',
 })
+
 
 const api = useApi()
 const toast = useToast()
@@ -34,21 +37,12 @@ const showEditModal = ref(false)
 const selectedTier = ref<AdminTier | null>(null)
 const submitting = ref(false)
 
-const availablePermissions = [
-  { label: 'Developer API Access (api:access)', value: 'api:access' },
-  { label: 'Custom Domain Access (custom:domain)', value: 'custom:domain' },
-  { label: 'Onyx Subdomains (onyx:subdomain)', value: 'onyx:subdomain' },
-  { label: 'Custom Path / Slug (custom:path)', value: 'custom:path' },
-  { label: 'Visitor Analytics (visitor:analytics)', value: 'visitor:analytics' },
-  { label: 'AI Analytics (ai:analysis)', value: 'ai:analysis' },
-  { label: 'QR Image Generator (qrimage)', value: 'qrimage' },
-  { label: 'SDK Access (sdk)', value: 'sdk' },
-]
+
 
 const form = ref({
   name: '',
   price: 0,
-  permissions: ['custom:path', 'visitor:analytics'],
+  permissions: ['free:link'],
   max_short_link: '100',
   link_durability: '14',
   max_custom_domains: '1',
@@ -72,15 +66,14 @@ const fetchTiers = async () => {
   }
 }
 
-onMounted(() => {
   fetchTiers()
-})
+
 
 const resetForm = () => {
   form.value = {
     name: '',
     price: 0,
-    permissions: ['custom:path', 'visitor:analytics'],
+    permissions: ['free:link'],
     max_short_link: '100',
     link_durability: '14',
     max_custom_domains: '1',
@@ -98,7 +91,7 @@ const openCreate = () => {
 }
 
 const handleCreateTier = async () => {
-  if (!form.value.name.strip()) return
+  if (!form.value.name.trim()) return
   submitting.value = true
   try {
     const newTier = await api<AdminTier>('/api/v1/admin/tiers', {
@@ -181,7 +174,7 @@ const handleDeleteTier = async (tier: AdminTier) => {
         <p class="text-xs text-zinc-400 mt-1">Configure subscription plans, set tier quotas, assign permissions, and sync with Paystack.</p>
       </div>
 
-      <UButton icon="i-lucide-plus" color="amber" variant="solid" size="md" @click="openCreate">
+      <UButton icon="i-lucide-plus" color="secondary" variant="solid" size="md" @click="openCreate">
         Create New Tier
       </UButton>
     </div>
@@ -306,7 +299,7 @@ const handleDeleteTier = async (tier: AdminTier) => {
       <template #footer>
         <div class="flex justify-end gap-3 w-full">
           <UButton color="neutral" variant="soft" @click="showCreateModal = false">Cancel</UButton>
-          <UButton color="amber" :loading="submitting" @click="handleCreateTier">Save & Sync Paystack</UButton>
+          <UButton color="primary" :loading="submitting" @click="handleCreateTier">Save & Sync Paystack</UButton>
         </div>
       </template>
     </UModal>
@@ -366,7 +359,7 @@ const handleDeleteTier = async (tier: AdminTier) => {
       <template #footer>
         <div class="flex justify-end gap-3 w-full">
           <UButton color="neutral" variant="soft" @click="showEditModal = false">Cancel</UButton>
-          <UButton color="amber" :loading="submitting" @click="handleUpdateTier">Update & Sync Paystack</UButton>
+          <UButton color="primary" :loading="submitting" @click="handleUpdateTier">Update & Sync Paystack</UButton>
         </div>
       </template>
     </UModal>

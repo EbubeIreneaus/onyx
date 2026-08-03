@@ -1,0 +1,59 @@
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - DB_URL=postgresql+asyncpg://onyx:onyx@postgres:5432/onyx
+    env_file:
+      - /api/.env
+    volumes:
+      - ./api:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+  
+  worker:
+    build: ./api
+    command: python -m workers.run
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - DB_URL=postgresql+asyncpg://onyx:onyx@postgres:5432/onyx
+    env_file:
+      - /api/.env
+    volumes:
+      - ./api:/app
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: onyx
+      POSTGRES_USER: onyx
+      POSTGRES_PASSWORD: onyx
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U onyx -d onyx"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

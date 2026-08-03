@@ -8,6 +8,9 @@ class Settings(BaseSettings):
     APP_ENV: str = "development"
     MIN_ALLOWED_SHORT_LINKS: int = 5 #Minimum short link any tier user could create
     DOMAIN_NAME: str = "onyx.com"
+
+    ONYX_ADMIN_PASS: str
+    ONYX_ADMIN_EMAIL: str
     
     PAYSTACK_SECRET: str
     PAYSTACK_PUBLIC: str

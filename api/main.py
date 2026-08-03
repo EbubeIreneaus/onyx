@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import Query
 from typing import Optional, Annotated
 from datetime import datetime, timezone
@@ -9,6 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from libs.limiter import limiter
+from libs.setup import ensure_default_admin_and_tier
 from models.db import get_db
 from models.redirect import Redirect as RedirectModel, RedirectVisitors as RedirectVisitorModel
 from setting import settings
@@ -19,7 +21,12 @@ from routers.v1.admin import router as admin_router
 from routers.v1.payment import router as payment_router
 from libs.logger import logger
 
-app = FastAPI(title="Onyx Link Managent & Web Tracking")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await ensure_default_admin_and_tier()
+    yield
+
+app = FastAPI(title="Onyx Link Managent & Web Tracking", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
