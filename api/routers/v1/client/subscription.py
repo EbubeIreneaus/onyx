@@ -1,5 +1,7 @@
+import json
 import uuid
 from datetime import datetime, timezone, timedelta
+from typing import List
 from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -9,7 +11,7 @@ from models.db import get_db
 from models.admin import Tier as TierModel
 from models.user import User as UserModel, Subscription as SubscriptionModel
 from schemas.user import UserOut, SUBSCRIPTION_STATUS
-from schemas.admin import SubscribeIn
+from schemas.admin import SubscribeIn, TierResponse
 from libs.deps import get_user
 from libs.redis import redis
 from libs.logger import logger
@@ -17,6 +19,32 @@ from payment import paystack
 from workers.config import get_arq_pool
 
 router = APIRouter()
+
+@router.get("/subscription/pricings", response_model=List[TierResponse])
+async def list_pricings(
+    db: AsyncSession = Depends(get_db),
+):
+    CACHE_KEY = "onyx:pricings"
+    try:
+        cached = await redis.get(CACHE_KEY)
+        if cached:
+            return json.loads(cached.decode())
+    except Exception as err:
+        logger.warning(f"Redis lookup failed for {CACHE_KEY}: {err}")
+
+    tiers = await db.scalars(
+        select(TierModel).where(TierModel.is_active == True).order_by(TierModel.price.asc())
+    )
+    all_tiers = tiers.all()
+
+    data = [TierResponse.model_validate(t).model_dump(mode="json") for t in all_tiers]
+
+    try:
+        await redis.set(CACHE_KEY, json.dumps(data), ex=86400)
+    except Exception as err:
+        logger.warning(f"Failed to set Redis cache for {CACHE_KEY}: {err}")
+
+    return data
 
 @router.post("/subscribe")
 async def subscribe_tier(

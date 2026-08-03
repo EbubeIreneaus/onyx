@@ -6,7 +6,6 @@ class AppPermission(Enum):
     FREE_LINK="free:link"
     VISITOR_ANALYTICS="visitor:analytics"
     CUSTOM_PATH="custom:path"
-    AI_ANALYSIS="ai:analysis"
     API_ACCESS="api:access"
     QRIMAGE="qrimage"
     SDK="sdk"

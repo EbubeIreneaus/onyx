@@ -13,8 +13,9 @@ from models.admin import Tier as TierModel
 from schemas.admin import TierCreate, TierUpdate, TierResponse
 from schemas.user import UserOut
 from libs.deps import get_admin
-from workers.config import get_arq_pool
 from libs.logger import logger
+from libs.redis import redis
+from workers.config import get_arq_pool
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
@@ -62,6 +63,11 @@ async def create_tier(
             await arq.enqueue_job("sync_paystack_plan_task", str(new_tier.tier_id), _queue_name="onyx")
         except Exception as err:
             logger.warning(f"Failed to enqueue sync_paystack_plan_task for new tier {new_tier.tier_id - new_tier.name}: {err}")
+
+    try:
+        await redis.delete("onyx:pricings")
+    except Exception as err:
+        logger.warning(f"Failed to clear onyx:pricings Redis cache: {err}")
 
     return new_tier
 
@@ -142,6 +148,11 @@ async def update_tier(
     except Exception as err:
         logger.warning(f"Failed to enqueue sync_paystack_plan_task for tier {tier.tier_id}: {err}")
 
+    try:
+        await redis.delete("onyx:pricings")
+    except Exception as err:
+        logger.warning(f"Failed to clear onyx:pricings Redis cache: {err}")
+
     return tier
 
 
@@ -169,6 +180,12 @@ async def delete_tier(
 
     await db.delete(tier)
     await db.commit()
+
+    try:
+        await redis.delete("onyx:pricings")
+    except Exception as err:
+        logger.warning(f"Failed to clear onyx:pricings Redis cache: {err}")
+
     return {"success": True, "detail": "Tier deleted successfully"}
 
 

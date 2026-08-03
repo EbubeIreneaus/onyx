@@ -30,6 +30,14 @@ async def create_domain(
     if existing:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Domain already registered")
 
+    main_domain = settings.DOMAIN_NAME.lower().strip()
+    api_domain = f"api.{main_domain}"
+    if domain_name == main_domain or domain_name == api_domain or domain_name.startswith("api."):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This domain or subdomain is reserved by the system",
+        )
+
     permissions, limits = get_user_permissions_and_limits(user)
     is_subdomain = domain_name.endswith(settings.DOMAIN_NAME)
 

@@ -13,6 +13,7 @@ from schemas.user import UserOut
 from schemas.redirect import RedirectCreate, RedirectUpdate, RedirectResponse, RedirectVisitorResponse
 from libs.deps import get_user
 from libs.logger import logger
+from libs.pages import is_reserved_path
 from permission import AppPermission
 from setting import settings
 from workers.config import get_arq_pool
@@ -108,6 +109,11 @@ async def create_short_link(
             )
 
         slug = body.slug.strip().strip('/')
+        if is_reserved_path(slug, target_domain):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="This custom path is reserved or already taken",
+            )
     else:
         slug = secrets.token_urlsafe(4)[:6]
 
@@ -242,6 +248,8 @@ async def update_redirect(
         r.destination = body.destination
     if body.slug:
         clean_slug = body.slug.strip().strip('/')
+        if is_reserved_path(clean_slug, r.domain):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This custom path is reserved or already taken")
         permissions, _ = get_user_permissions_and_limits(user)
         if AppPermission.CUSTOM_PATH not in permissions and AppPermission.CUSTOM_PATH.value not in permissions:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Custom slug permission required")
