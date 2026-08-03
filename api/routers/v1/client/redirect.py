@@ -12,8 +12,10 @@ from models.redirect import Domain as DomainModel, Redirect as RedirectModel, Re
 from schemas.user import UserOut
 from schemas.redirect import RedirectCreate, RedirectUpdate, RedirectResponse, RedirectVisitorResponse
 from libs.deps import get_user
+from libs.logger import logger
 from permission import AppPermission
 from setting import settings
+from workers.config import get_arq_pool
 from .utils import get_user_permissions_and_limits
 
 router = APIRouter()
@@ -147,17 +149,33 @@ async def create_short_link(
     else:
         expired_on = max_expired_on
 
+    can_generate_qrimage = (AppPermission.QRIMAGE in permissions or AppPermission.QRIMAGE.value in permissions)
+
     new_redirect = RedirectModel(
         user_id=user.user_id,
         domain=target_domain,
         slug=slug,
+        qr_image="generating" if can_generate_qrimage else None,
         destination=body.destination,
         expired_on=expired_on,
     )
 
     db.add(new_redirect)
-    await db.commit()
+    await db.flush()
     await db.refresh(new_redirect)
+
+    if can_generate_qrimage:
+        try:
+            arq = await get_arq_pool()
+            await arq.enqueue_job(
+                "create_and_upload_qr_code",
+                str(new_redirect.redirect_id),
+                f"https://{new_redirect.domain}/{new_redirect.slug}",
+                _queue_name="onyx",
+            )
+        except Exception as err:
+            print(f"Failed to queue QR job: {err}")
+
     return new_redirect
 
 @router.get("/redirects", response_model=List[RedirectResponse])
@@ -261,6 +279,14 @@ async def delete_redirect(
 
     await db.delete(r)
     await db.commit()
+
+    if r.qr_image:
+        try:
+            arq = await get_arq_pool()
+            await arq.enqueue_job("delete_qr_image", str(r.redirect_id), _queue_name="onyx")
+        except Exception as err:
+            logger.warning(f"Failed to queue QR deletion job for redirect {r.redirect_id}: {err}")
+
     return {"success": True, "detail": "Redirect deleted"}
 
 import json

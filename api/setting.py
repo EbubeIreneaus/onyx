@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str
     APP_ENV: str = "development"
     MIN_ALLOWED_SHORT_LINKS: int = 5 #Minimum short link any tier user could create
-    DOMAIN_NAME: str = "onyx.com"
+    DOMAIN_NAME: str
 
     ONYX_ADMIN_PASS: str
     ONYX_ADMIN_EMAIL: str

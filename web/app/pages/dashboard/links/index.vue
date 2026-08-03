@@ -7,8 +7,48 @@ const { links, activeLinks, expiredLinks, totalClicks, fetchLinks, pending, crea
 
 fetchLinks()
 
-// Create modal state
 const showModal = ref(false)
+const qrModalOpen = ref(false)
+const selectedQrLink = ref<RedirectOut | null>(null)
+let qrPollTimer: ReturnType<typeof setInterval> | null = null
+
+function getQrState(value: RedirectOut['qr_image']) {
+  if (!value || value === '') return 'none'
+  if (value === 'generating') return 'generating'
+  return 'ready'
+}
+
+function startQrPolling() {
+  if (qrPollTimer) return
+  qrPollTimer = setInterval(() => {
+    if (!pending.value && links.value.some(link => getQrState(link.qr_image) === 'generating')) {
+      fetchLinks()
+    }
+  }, 4000)
+}
+
+function stopQrPolling() {
+  if (qrPollTimer) {
+    clearInterval(qrPollTimer)
+    qrPollTimer = null
+  }
+}
+
+function openQrModal(link: RedirectOut) {
+  selectedQrLink.value = link
+  if (getQrState(link.qr_image) === 'generating') {
+    fetchLinks()
+  }
+  qrModalOpen.value = true
+}
+
+function downloadQr(link: RedirectOut) {
+  if (!link.qr_image) return
+  const anchor = document.createElement('a')
+  anchor.href = link.qr_image
+  anchor.download = `qr-${link.slug || link.redirect_id}.png`
+  anchor.click()
+}
 
 // Search + filter
 const search = ref('')
@@ -38,6 +78,14 @@ function formatDate(d: string) {
 function truncate(s: string, n = 45) {
   return s.length > n ? s.slice(0, n) + '…' : s
 }
+
+onMounted(() => {
+  startQrPolling()
+})
+
+onBeforeUnmount(() => {
+  stopQrPolling()
+})
 </script>
 
 <template>
@@ -162,9 +210,19 @@ function truncate(s: string, n = 45) {
         </div>
 
         <!-- Actions -->
-        <div class="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div class="flex items-center gap-1 shrink-0">
           <UButton icon="i-lucide-bar-chart-3" size="xs" color="neutral" variant="ghost" title="View Analytics" :to="`/dashboard/redirect/${link.redirect_id}`" />
           <UButton icon="i-lucide-copy" size="xs" color="neutral" variant="ghost" title="Copy link" @click="copyLink(link)" />
+          <UButton
+            v-if="getQrState(link.qr_image) !== 'none'"
+            :icon="getQrState(link.qr_image) === 'generating' ? 'i-lucide-clock-3' : 'i-lucide-qr-code'"
+            size="xs"
+            color="neutral"
+            variant="ghost"
+            :title="getQrState(link.qr_image) === 'generating' ? 'QR image is generating' : 'View QR code'"
+            :disabled="getQrState(link.qr_image) === 'generating'"
+            @click="getQrState(link.qr_image) === 'ready' ? openQrModal(link) : null"
+          />
           <UButton icon="i-lucide-external-link" size="xs" color="neutral" variant="ghost" title="Open link"
             :to="`https://${link.domain}/${link.slug}`" target="_blank" />
           <UButton icon="i-lucide-trash-2" size="xs" color="error" variant="ghost" title="Delete link" @click="deleteLink(link.redirect_id)" />
@@ -174,5 +232,30 @@ function truncate(s: string, n = 45) {
 
     <!-- Create Link Modal -->
     <CreateLinkModal v-model:open="showModal" @created="fetchLinks" />
+
+    <div
+      v-if="qrModalOpen && selectedQrLink"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
+      @click.self="qrModalOpen = false"
+    >
+      <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl dark:bg-zinc-900">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold text-slate-900 dark:text-white">QR Code</h3>
+          <div class="flex items-center gap-2">
+            <UButton v-if="getQrState(selectedQrLink.qr_image) === 'ready'" icon="i-lucide-download" size="sm" @click="downloadQr(selectedQrLink)">
+              Download
+            </UButton>
+            <UButton icon="i-lucide-x" size="sm" color="neutral" variant="ghost" @click="qrModalOpen = false" />
+          </div>
+        </div>
+        <div v-if="getQrState(selectedQrLink.qr_image) === 'ready'" class="flex justify-center">
+          <img :src="selectedQrLink.qr_image" alt="QR Code" class="max-w-full max-h-[60vh] rounded-lg border border-zinc-200 dark:border-zinc-800" />
+        </div>
+        <p v-else-if="getQrState(selectedQrLink.qr_image) === 'generating'" class="text-sm text-slate-500">
+          Your image is generating.
+        </p>
+        <p v-else class="text-sm text-slate-500">QR image is not available yet.</p>
+      </div>
+    </div>
   </div>
 </template>

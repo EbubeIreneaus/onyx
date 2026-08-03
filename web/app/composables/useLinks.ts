@@ -1,8 +1,11 @@
+export type QrImageValue = string | null | 'generating'
+
 export interface RedirectOut {
   redirect_id: string
   slug: string
   domain: string
   destination: string
+  qr_image?: QrImageValue
   expired: boolean
   expired_on: string | null
   created_at: string
@@ -71,7 +74,9 @@ export const useLinks = () => {
   const fetchLinks = async () => {
     pending.value = true
     try {
-      const res = await api<RedirectOut[]>('/api/v1/client/redirects')
+      const res = await api<RedirectOut[]>('/api/v1/client/redirects', {
+        cache: 'no-store',
+      })
       links.value = res
     }
     catch (err: any) {

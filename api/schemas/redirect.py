@@ -31,6 +31,7 @@ class RedirectResponse(BaseModel):
     domain: str
     slug: Optional[str] = None
     destination: str
+    qr_image: Optional[str] = None
     expired: bool
     expired_on: Optional[datetime] = None
     created_at: datetime

@@ -4,7 +4,7 @@ from setting import settings
 from .auth import update_session, send_welcome_email
 from .paystack import create_paystack_customer_task, sync_paystack_plan_task, process_paystack_webhook_task
 from .redirect import log_redirect_visitor_task
-from .qr import create_and_upload_qr_code, save_qr_to_redirect
+from .qr import create_and_upload_qr_code, save_qr_to_redirect, delete_qr_image
 
 REDIS_SETTING = RedisSettings.from_dsn(settings.REDIS_URL)
 
@@ -22,6 +22,7 @@ class WorkerSettings:
         log_redirect_visitor_task,
         create_and_upload_qr_code,
         save_qr_to_redirect,
+        delete_qr_image,
     ]
     redis_settings = REDIS_SETTING
     queue_name = "onyx"
