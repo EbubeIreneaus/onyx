@@ -4,16 +4,46 @@ on: push
 
 jobs:
   ci:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        node: [22]
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: onyx
+          POSTGRES_USER: onyx
+          POSTGRES_PASSWORD: onyx
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U onyx -d onyx"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
 
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install API dependencies
+        working-directory: api
+        run: uv sync
+
+      - name: Run API tests
+        working-directory: api
+        run: uv run pytest -q
 
       - name: Install pnpm
         uses: pnpm/action-setup@v6
@@ -21,14 +51,47 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v7
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 22
           cache: pnpm
 
-      - name: Install dependencies
+      - name: Install web dependencies
+        working-directory: web
         run: pnpm install
 
-      - name: Lint
+      - name: Lint web
+        working-directory: web
         run: pnpm run lint
 
-      - name: Typecheck
+      - name: Typecheck web
+        working-directory: web
         run: pnpm run typecheck
+
+      - name: Install Playwright browsers
+        working-directory: web
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Start web app
+        working-directory: web
+        run: pnpm run dev --host 127.0.0.1 --port 3000 > /tmp/onyx-web.log 2>&1 &
+
+      - name: Start API app
+        working-directory: api
+        run: uv run uvicorn main:app --host 127.0.0.1 --port 8000 > /tmp/onyx-api.log 2>&1 &
+
+      - name: Wait for services
+        run: |
+          for i in {1..60}; do
+            curl -fsS http://127.0.0.1:8000/api/v1/auth/me >/dev/null 2>&1 && break
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:3000 >/dev/null 2>&1
+
+      - name: Run Playwright tests
+        working-directory: web
+        run: pnpm run test:e2e
+
+      - name: Build docker compose stack
+        run: docker compose up --build -d
+
+      - name: Verify docker compose services
+        run: docker compose ps

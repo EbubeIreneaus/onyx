@@ -1,18 +1,21 @@
 import asyncio
-import sys
-import os
-import json
-import hmac
 import hashlib
+import hmac
+import json
+import os
+import sys
 import uuid
-from httpx import AsyncClient, ASGITransport
+
+import pytest
+from httpx import ASGITransport, AsyncClient
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from main import app
-from setting import settings
 from payment import paystack
-from workers.paystack import process_paystack_webhook_task, sync_paystack_plan_task
+from setting import settings
 
+
+@pytest.mark.asyncio
 async def test_paystack_integration():
     print("=== 1. Testing Webhook Signature Verification ===")
     secret = settings.PAYSTACK_SECRET or "test_secret"

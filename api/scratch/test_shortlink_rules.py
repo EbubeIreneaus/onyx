@@ -1,14 +1,18 @@
 import asyncio
-import sys
 import os
-import uuid
+import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from workers.redirect import log_redirect_visitor_task
-from models.db import SessionLocal
-from models.redirect import RedirectVisitors as RedirectVisitorModel, Redirect as RedirectModel
+import pytest
 from sqlalchemy import select
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from models.db import SessionLocal
+from models.redirect import Redirect as RedirectModel
+from models.redirect import RedirectVisitors as RedirectVisitorModel
+from workers.redirect import log_redirect_visitor_task
+
+
+@pytest.mark.asyncio
 async def test_redirect_rules():
     print("=== Testing Redirect Visitor Worker Task ===")
     async with SessionLocal() as db:
