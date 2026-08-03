@@ -24,3 +24,5 @@ dist
 .env
 .env.*
 !.env.example
+
+/web/test-results

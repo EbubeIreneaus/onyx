@@ -117,7 +117,7 @@ function formatPrice(price: number | string): string {
                   name="i-lucide-minus"
                   class="w-4 h-4 shrink-0 text-zinc-400 dark:text-zinc-600"
                 />
-                <span :class="hasPermission(tier, perm.value) ? 'text-slate-700 dark:text-slate-300 font-medium' : 'text-slate-400 dark:text-slate-600 line-through opacity-70'">
+                <span :class="hasPermission(tier, perm.value) ? 'text-slate-700 dark:text-slate-300 font-medium' : 'text-slate-400 dark:text-slate-600 opacity-70'">
                   {{ perm.label }}
                 </span>
               </li>
