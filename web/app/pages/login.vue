@@ -3,7 +3,7 @@ definePageMeta({ layout: false })
 
 useSeoMeta({
   title: 'Sign In — Onyx',
-  description: 'Sign in to your Onyx account to manage your links, domains, and analytics.',
+  description: 'Sign in to your Onyx account to manage your links, domains, and analytics.'
 })
 
 const { signin, loading, isAuthenticated } = useAuth()
@@ -20,8 +20,7 @@ async function handleSubmit() {
   error.value = ''
   try {
     await signin(state.email, state.password)
-  }
-  catch (err: any) {
+  } catch (err: any) {
     error.value = err?.data?.detail || 'Sign in failed. Please check your credentials.'
   }
 }
@@ -33,15 +32,20 @@ async function handleSubmit() {
       <!-- Left panel (decorative) -->
       <div class="hidden lg:flex flex-col justify-between w-1/2 bg-gradient-to-br from-zinc-900 via-zinc-800 to-indigo-900 p-12 relative overflow-hidden">
         <!-- Grid pattern -->
-        <div class="absolute inset-0 opacity-10"
-          style="background-image: linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px); background-size: 40px 40px;" />
+        <div
+          class="absolute inset-0 opacity-10"
+          style="background-image: linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px); background-size: 40px 40px;"
+        />
 
         <!-- Glow blobs -->
         <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-zinc-500/30 rounded-full blur-3xl" />
         <div class="absolute bottom-1/4 right-1/4 w-48 h-48 bg-indigo-500/30 rounded-full blur-3xl" />
 
         <div class="relative z-10">
-          <NuxtLink to="/" class="inline-block">
+          <NuxtLink
+            to="/"
+            class="inline-block"
+          >
             <div class="flex items-center gap-2">
               <div class="w-8 h-8 bg-white/20 backdrop-blur rounded-lg rotate-45" />
               <span class="text-xl font-bold text-white">onyx</span>
@@ -54,17 +58,26 @@ async function handleSubmit() {
             "Onyx transformed how we share content. Our branded links get 40% more clicks."
           </blockquote>
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-white font-bold">E</div>
+            <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-white font-bold">
+              E
+            </div>
             <div>
-              <p class="text-white font-semibold">Ebube Ireneaus</p>
-              <p class="text-zinc-300 text-sm">Founder, 16vmart</p>
+              <p class="text-white font-semibold">
+                Ebube Ireneaus
+              </p>
+              <p class="text-zinc-300 text-sm">
+                Founder, 16vmart
+              </p>
             </div>
           </div>
 
           <!-- Feature chips -->
           <div class="flex flex-wrap gap-2 pt-4">
-            <span v-for="feat in ['Custom Domains', 'Analytics', 'QR Codes', 'API Access']" :key="feat"
-              class="px-3 py-1 rounded-full bg-white/10 backdrop-blur text-white/80 text-xs font-medium border border-white/20">
+            <span
+              v-for="feat in ['Custom Domains', 'Analytics', 'QR Codes', 'API Access']"
+              :key="feat"
+              class="px-3 py-1 rounded-full bg-white/10 backdrop-blur text-white/80 text-xs font-medium border border-white/20"
+            >
               {{ feat }}
             </span>
           </div>
@@ -84,8 +97,12 @@ async function handleSubmit() {
           </div>
 
           <div class="mb-8">
-            <h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-2">Welcome back</h1>
-            <p class="text-slate-500 dark:text-slate-400">Sign in to your Onyx account</p>
+            <h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+              Welcome back
+            </h1>
+            <p class="text-slate-500 dark:text-slate-400">
+              Sign in to your Onyx account
+            </p>
           </div>
 
           <!-- Error alert -->
@@ -98,7 +115,10 @@ async function handleSubmit() {
             class="mb-6"
           />
 
-          <form class="space-y-5" @submit.prevent="handleSubmit">
+          <form
+            class="space-y-5"
+            @submit.prevent="handleSubmit"
+          >
             <div>
               <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Email address</label>
               <UInput
@@ -117,7 +137,10 @@ async function handleSubmit() {
             <div>
               <div class="flex items-center justify-between mb-1.5">
                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Password</label>
-                <NuxtLink to="/forgot-password" class="text-xs text-zinc-600 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300">
+                <NuxtLink
+                  to="/forgot-password"
+                  class="text-xs text-zinc-600 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300"
+                >
                   Forgot password?
                 </NuxtLink>
               </div>
@@ -148,7 +171,10 @@ async function handleSubmit() {
 
           <p class="text-center text-sm text-slate-500 dark:text-slate-400 mt-6">
             Don't have an account?
-            <NuxtLink to="/signup" class="font-medium text-zinc-600 hover:text-zinc-700 dark:text-zinc-400">
+            <NuxtLink
+              to="/signup"
+              class="font-medium text-zinc-600 hover:text-zinc-700 dark:text-zinc-400"
+            >
               Create one free
             </NuxtLink>
           </p>

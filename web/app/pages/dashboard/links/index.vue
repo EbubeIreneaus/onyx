@@ -97,7 +97,7 @@ onBeforeUnmount(() => {
           v-for="tab in [
             { key: 'all', label: `All (${links.length})` },
             { key: 'active', label: `Active (${activeLinks.length})` },
-            { key: 'expired', label: `Expired (${expiredLinks.length})` },
+            { key: 'expired', label: `Expired (${expiredLinks.length})` }
           ]"
           :key="tab.key"
           :color="filter === tab.key ? 'primary' : 'neutral'"
@@ -117,7 +117,12 @@ onBeforeUnmount(() => {
           size="sm"
           class="flex-1 sm:w-64"
         />
-        <UButton size="sm" icon="i-lucide-plus" class="shrink-0" @click="showModal = true">
+        <UButton
+          size="sm"
+          icon="i-lucide-plus"
+          class="shrink-0"
+          @click="showModal = true"
+        >
           New link
         </UButton>
       </div>
@@ -126,28 +131,52 @@ onBeforeUnmount(() => {
     <!-- Stats row -->
     <div class="grid grid-cols-3 gap-4 mb-6">
       <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center">
-        <p class="text-2xl font-bold text-slate-900 dark:text-white">{{ links.length }}</p>
-        <p class="text-xs text-slate-500 mt-0.5">Total links</p>
+        <p class="text-2xl font-bold text-slate-900 dark:text-white">
+          {{ links.length }}
+        </p>
+        <p class="text-xs text-slate-500 mt-0.5">
+          Total links
+        </p>
       </div>
       <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center">
-        <p class="text-2xl font-bold text-zinc-600 dark:text-zinc-400">{{ activeLinks.length }}</p>
-        <p class="text-xs text-slate-500 mt-0.5">Active</p>
+        <p class="text-2xl font-bold text-zinc-600 dark:text-zinc-400">
+          {{ activeLinks.length }}
+        </p>
+        <p class="text-xs text-slate-500 mt-0.5">
+          Active
+        </p>
       </div>
       <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center">
-        <p class="text-2xl font-bold text-slate-900 dark:text-white">{{ totalClicks.toLocaleString() }}</p>
-        <p class="text-xs text-slate-500 mt-0.5">Total clicks</p>
+        <p class="text-2xl font-bold text-slate-900 dark:text-white">
+          {{ totalClicks.toLocaleString() }}
+        </p>
+        <p class="text-xs text-slate-500 mt-0.5">
+          Total clicks
+        </p>
       </div>
     </div>
 
     <!-- Loading -->
-    <div v-if="pending" class="py-16 flex justify-center">
-      <UIcon name="i-lucide-loader-2" class="w-8 h-8 animate-spin text-zinc-500" />
+    <div
+      v-if="pending"
+      class="py-16 flex justify-center"
+    >
+      <UIcon
+        name="i-lucide-loader-2"
+        class="w-8 h-8 animate-spin text-zinc-500"
+      />
     </div>
 
     <!-- Empty state -->
-    <div v-else-if="!filteredLinks.length" class="py-16 text-center">
+    <div
+      v-else-if="!filteredLinks.length"
+      class="py-16 text-center"
+    >
       <div class="inline-flex p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-950/40 mb-4">
-        <UIcon name="i-lucide-link" class="w-10 h-10 text-zinc-500" />
+        <UIcon
+          name="i-lucide-link"
+          class="w-10 h-10 text-zinc-500"
+        />
       </div>
       <p class="text-lg font-semibold text-slate-900 dark:text-white mb-1">
         {{ search ? 'No links match your search' : 'No links here yet' }}
@@ -155,11 +184,20 @@ onBeforeUnmount(() => {
       <p class="text-slate-500 text-sm mb-5">
         {{ search ? 'Try a different keyword.' : 'Create your first short link to get started.' }}
       </p>
-      <UButton v-if="!search" icon="i-lucide-plus" @click="showModal = true">Create link</UButton>
+      <UButton
+        v-if="!search"
+        icon="i-lucide-plus"
+        @click="showModal = true"
+      >
+        Create link
+      </UButton>
     </div>
 
     <!-- Links list -->
-    <div v-else class="space-y-2">
+    <div
+      v-else
+      class="space-y-2"
+    >
       <div
         v-for="link in filteredLinks"
         :key="link.redirect_id"
@@ -190,29 +228,56 @@ onBeforeUnmount(() => {
               :label="link.expired ? 'Expired' : 'Active'"
             />
           </div>
-          <p class="text-xs text-slate-500 dark:text-slate-400 truncate">{{ truncate(link.destination) }}</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400 truncate">
+            {{ truncate(link.destination) }}
+          </p>
         </div>
 
         <!-- Metadata (hidden on mobile) -->
         <div class="hidden md:flex items-center gap-6 shrink-0 text-center">
-          <NuxtLink :to="`/dashboard/redirect/${link.redirect_id}`" class="hover:underline">
+          <NuxtLink
+            :to="`/dashboard/redirect/${link.redirect_id}`"
+            class="hover:underline"
+          >
             <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ (link.visitor_count || 0).toLocaleString() }}</p>
             <p class="text-xs text-slate-400">clicks</p>
           </NuxtLink>
           <div>
-            <p class="text-xs text-slate-500">{{ formatDate(link.created_at) }}</p>
-            <p class="text-xs text-slate-400">created</p>
+            <p class="text-xs text-slate-500">
+              {{ formatDate(link.created_at) }}
+            </p>
+            <p class="text-xs text-slate-400">
+              created
+            </p>
           </div>
           <div v-if="link.expired_on">
-            <p class="text-xs text-slate-500">{{ formatDate(link.expired_on) }}</p>
-            <p class="text-xs text-slate-400">expires</p>
+            <p class="text-xs text-slate-500">
+              {{ formatDate(link.expired_on) }}
+            </p>
+            <p class="text-xs text-slate-400">
+              expires
+            </p>
           </div>
         </div>
 
         <!-- Actions -->
         <div class="flex items-center gap-1 shrink-0">
-          <UButton icon="i-lucide-bar-chart-3" size="xs" color="neutral" variant="ghost" title="View Analytics" :to="`/dashboard/redirect/${link.redirect_id}`" />
-          <UButton icon="i-lucide-copy" size="xs" color="neutral" variant="ghost" title="Copy link" @click="copyLink(link)" />
+          <UButton
+            icon="i-lucide-bar-chart-3"
+            size="xs"
+            color="neutral"
+            variant="ghost"
+            title="View Analytics"
+            :to="`/dashboard/redirect/${link.redirect_id}`"
+          />
+          <UButton
+            icon="i-lucide-copy"
+            size="xs"
+            color="neutral"
+            variant="ghost"
+            title="Copy link"
+            @click="copyLink(link)"
+          />
           <UButton
             v-if="getQrState(link.qr_image) !== 'none'"
             :icon="getQrState(link.qr_image) === 'generating' ? 'i-lucide-clock-3' : 'i-lucide-qr-code'"
@@ -223,15 +288,32 @@ onBeforeUnmount(() => {
             :disabled="getQrState(link.qr_image) === 'generating'"
             @click="getQrState(link.qr_image) === 'ready' ? openQrModal(link) : null"
           />
-          <UButton icon="i-lucide-external-link" size="xs" color="neutral" variant="ghost" title="Open link"
-            :to="`https://${link.domain}/${link.slug}`" target="_blank" />
-          <UButton icon="i-lucide-trash-2" size="xs" color="error" variant="ghost" title="Delete link" @click="deleteLink(link.redirect_id)" />
+          <UButton
+            icon="i-lucide-external-link"
+            size="xs"
+            color="neutral"
+            variant="ghost"
+            title="Open link"
+            :to="`https://${link.domain}/${link.slug}`"
+            target="_blank"
+          />
+          <UButton
+            icon="i-lucide-trash-2"
+            size="xs"
+            color="error"
+            variant="ghost"
+            title="Delete link"
+            @click="deleteLink(link.redirect_id)"
+          />
         </div>
       </div>
     </div>
 
     <!-- Create Link Modal -->
-    <CreateLinkModal v-model:open="showModal" @created="fetchLinks" />
+    <CreateLinkModal
+      v-model:open="showModal"
+      @created="fetchLinks"
+    />
 
     <div
       v-if="qrModalOpen && selectedQrLink"
@@ -240,21 +322,49 @@ onBeforeUnmount(() => {
     >
       <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl dark:bg-zinc-900">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-semibold text-slate-900 dark:text-white">QR Code</h3>
+          <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
+            QR Code
+          </h3>
           <div class="flex items-center gap-2">
-            <UButton v-if="getQrState(selectedQrLink.qr_image) === 'ready'" icon="i-lucide-download" size="sm" @click="downloadQr(selectedQrLink)">
+            <UButton
+              v-if="getQrState(selectedQrLink.qr_image) === 'ready'"
+              icon="i-lucide-download"
+              size="sm"
+              @click="downloadQr(selectedQrLink)"
+            >
               Download
             </UButton>
-            <UButton icon="i-lucide-x" size="sm" color="neutral" variant="ghost" @click="qrModalOpen = false" />
+            <UButton
+              icon="i-lucide-x"
+              size="sm"
+              color="neutral"
+              variant="ghost"
+              @click="qrModalOpen = false"
+            />
           </div>
         </div>
-        <div v-if="getQrState(selectedQrLink.qr_image) === 'ready'" class="flex justify-center">
-          <img :src="selectedQrLink.qr_image" alt="QR Code" class="max-w-full max-h-[60vh] rounded-lg border border-zinc-200 dark:border-zinc-800" />
+        <div
+          v-if="getQrState(selectedQrLink.qr_image) === 'ready'"
+          class="flex justify-center"
+        >
+          <img
+            :src="selectedQrLink.qr_image"
+            alt="QR Code"
+            class="max-w-full max-h-[60vh] rounded-lg border border-zinc-200 dark:border-zinc-800"
+          >
         </div>
-        <p v-else-if="getQrState(selectedQrLink.qr_image) === 'generating'" class="text-sm text-slate-500">
+        <p
+          v-else-if="getQrState(selectedQrLink.qr_image) === 'generating'"
+          class="text-sm text-slate-500"
+        >
           Your image is generating.
         </p>
-        <p v-else class="text-sm text-slate-500">QR image is not available yet.</p>
+        <p
+          v-else
+          class="text-sm text-slate-500"
+        >
+          QR image is not available yet.
+        </p>
       </div>
     </div>
   </div>

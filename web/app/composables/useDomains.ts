@@ -5,6 +5,7 @@ export interface DomainOut {
   txt_verified: boolean
   cname_verified: boolean
   txt_token?: string | null
+  subdomain_prefix?: string | null
   is_root_domain?: boolean
   created_at: string
 }
@@ -36,11 +37,9 @@ export const useDomains = () => {
     try {
       const res = await api<DomainOut[]>('/api/v1/client/domains')
       domains.value = res
-    }
-    catch (err: any) {
+    } catch (err: any) {
       toast.add({ title: 'Error', description: err?.data?.detail || 'Failed to load domains.', color: 'error' })
-    }
-    finally {
+    } finally {
       pending.value = false
     }
   }
@@ -49,8 +48,7 @@ export const useDomains = () => {
     try {
       const res = await api<DomainOut>(`/api/v1/client/domains/${id}`)
       return res
-    }
-    catch (err: any) {
+    } catch (err: any) {
       toast.add({ title: 'Error', description: err?.data?.detail || 'Domain not found.', color: 'error' })
       return null
     }
@@ -60,11 +58,10 @@ export const useDomains = () => {
     try {
       const res = await api<DomainCheckResult>('/api/v1/client/check-domain', {
         method: 'POST',
-        body: { domain, slug },
+        body: { domain, slug }
       })
       return res
-    }
-    catch (err: any) {
+    } catch (err: any) {
       return null
     }
   }
@@ -73,13 +70,12 @@ export const useDomains = () => {
     try {
       const res = await api<DomainOut>('/api/v1/client/create-domain', {
         method: 'POST',
-        body,
+        body
       })
       domains.value.unshift(res)
       toast.add({ title: 'Domain registered!', description: body.name, color: 'success' })
       return res
-    }
-    catch (err: any) {
+    } catch (err: any) {
       const msg = err?.data?.detail || 'Failed to register domain.'
       toast.add({ title: 'Error', description: msg, color: 'error' })
       return null
@@ -91,8 +87,7 @@ export const useDomains = () => {
       await api(`/api/v1/client/domains/${domainId}`, { method: 'DELETE' })
       domains.value = domains.value.filter(d => d.id !== domainId)
       toast.add({ title: 'Domain removed', color: 'success' })
-    }
-    catch (err: any) {
+    } catch (err: any) {
       toast.add({ title: 'Error', description: err?.data?.detail || 'Failed to delete.', color: 'error' })
     }
   }
@@ -109,6 +104,6 @@ export const useDomains = () => {
     fetchDomainById,
     checkDomain,
     createDomain,
-    deleteDomain,
+    deleteDomain
   }
 }

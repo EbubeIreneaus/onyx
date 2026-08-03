@@ -11,7 +11,7 @@ const props = withDefaults(defineProps<{
   color: 'neutral',
   size: 'md',
   variant: 'solid',
-  block: false,
+  block: false
 })
 
 const emit = defineEmits<{
@@ -44,7 +44,10 @@ function handleLockedClick() {
 </script>
 
 <template>
-  <div v-if="!hasPermission" class="inline-block relative group">
+  <div
+    v-if="!hasPermission"
+    class="inline-block relative group"
+  >
     <UButton
       :color="color"
       :variant="variant"
@@ -55,7 +58,10 @@ function handleLockedClick() {
       @click="handleLockedClick"
     >
       <template #leading>
-        <UIcon name="i-lucide-lock" class="w-4 h-4 text-amber-500 shrink-0" />
+        <UIcon
+          name="i-lucide-lock"
+          class="w-4 h-4 text-amber-500 shrink-0"
+        />
       </template>
       <span>{{ label }}</span>
     </UButton>
@@ -63,7 +69,10 @@ function handleLockedClick() {
     <!-- Hover tooltip -->
     <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex flex-col items-center z-50 pointer-events-none">
       <div class="bg-zinc-900 dark:bg-zinc-100 text-zinc-100 dark:text-zinc-900 text-xs font-semibold px-2.5 py-1.5 rounded-md shadow-lg whitespace-nowrap flex items-center gap-1.5">
-        <UIcon name="i-lucide-zap" class="w-3.5 h-3.5 text-amber-400 dark:text-amber-600" />
+        <UIcon
+          name="i-lucide-zap"
+          class="w-3.5 h-3.5 text-amber-400 dark:text-amber-600"
+        />
         <span>Upgrade plan to access</span>
       </div>
       <div class="w-2 h-2 bg-zinc-900 dark:bg-zinc-100 rotate-45 -mt-1" />

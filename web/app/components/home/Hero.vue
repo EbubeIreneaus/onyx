@@ -35,7 +35,7 @@ const stats = [
   { value: '10M+', label: 'Links shortened' },
   { value: '500K+', label: 'Active users' },
   { value: '99.9%', label: 'Uptime' },
-  { value: '180+', label: 'Countries served' },
+  { value: '180+', label: 'Countries served' }
 ]
 </script>
 
@@ -67,7 +67,10 @@ const stats = [
       <div class="max-w-2xl mx-auto mb-6">
         <div class="flex flex-col sm:flex-row gap-3 p-2 bg-white dark:bg-slate-900 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-slate-950/50 border border-slate-200 dark:border-slate-800">
           <div class="relative flex-1">
-            <UIcon name="i-lucide-link" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <UIcon
+              name="i-lucide-link"
+              class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"
+            />
             <input
               v-model="url"
               type="url"
@@ -93,7 +96,11 @@ const stats = [
             v-if="result"
             class="mt-3 flex items-center justify-between gap-3 px-4 py-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 rounded-xl"
           >
-            <a :href="result" target="_blank" class="text-emerald-700 dark:text-emerald-300 font-medium hover:underline truncate">
+            <a
+              :href="result"
+              target="_blank"
+              class="text-emerald-700 dark:text-emerald-300 font-medium hover:underline truncate"
+            >
               {{ result }}
             </a>
             <UButton
@@ -110,12 +117,22 @@ const stats = [
       <!-- CTA buttons -->
       <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
         <NuxtLink to="/signup">
-          <UButton size="xl" class="rounded-xl" trailing-icon="i-lucide-arrow-right">
+          <UButton
+            size="xl"
+            class="rounded-xl"
+            trailing-icon="i-lucide-arrow-right"
+          >
             Start for free
           </UButton>
         </NuxtLink>
         <NuxtLink to="/#pricing">
-          <UButton size="xl" color="neutral" variant="ghost" class="rounded-xl" trailing-icon="i-lucide-chevron-down">
+          <UButton
+            size="xl"
+            color="neutral"
+            variant="ghost"
+            class="rounded-xl"
+            trailing-icon="i-lucide-chevron-down"
+          >
             See pricing
           </UButton>
         </NuxtLink>
@@ -128,15 +145,22 @@ const stats = [
           :key="stat.label"
           class="text-center"
         >
-          <div class="text-3xl font-bold text-slate-900 dark:text-white">{{ stat.value }}</div>
-          <div class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ stat.label }}</div>
+          <div class="text-3xl font-bold text-slate-900 dark:text-white">
+            {{ stat.value }}
+          </div>
+          <div class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            {{ stat.label }}
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Scroll indicator -->
     <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-      <UIcon name="i-lucide-chevron-down" class="w-6 h-6 text-slate-400" />
+      <UIcon
+        name="i-lucide-chevron-down"
+        class="w-6 h-6 text-slate-400"
+      />
     </div>
   </section>
 </template>

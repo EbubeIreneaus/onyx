@@ -1,11 +1,11 @@
 <script setup lang="ts">
 definePageMeta({
   layout: 'dashboard',
-  middleware: ['auth'],
+  middleware: ['auth']
 })
 
 useSeoMeta({
-  title: 'Developer API — Onyx',
+  title: 'Developer API — Onyx'
 })
 
 const config = useRuntimeConfig()
@@ -72,7 +72,10 @@ print(response.json())`
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
         <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2.5">
-          <UIcon name="i-lucide-code-2" class="w-7 h-7 text-emerald-500" />
+          <UIcon
+            name="i-lucide-code-2"
+            class="w-7 h-7 text-emerald-500"
+          />
           Developer API Keys
         </h1>
         <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
@@ -92,8 +95,14 @@ print(response.json())`
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="py-16 flex justify-center">
-      <UIcon name="i-lucide-loader-2" class="w-8 h-8 animate-spin text-zinc-500" />
+    <div
+      v-if="loading"
+      class="py-16 flex justify-center"
+    >
+      <UIcon
+        name="i-lucide-loader-2"
+        class="w-8 h-8 animate-spin text-zinc-500"
+      />
     </div>
 
     <template v-else>
@@ -104,7 +113,10 @@ print(response.json())`
       >
         <div class="flex items-start gap-4">
           <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl shrink-0">
-            <UIcon name="i-lucide-lock" class="w-6 h-6" />
+            <UIcon
+              name="i-lucide-lock"
+              class="w-6 h-6"
+            />
           </div>
           <div class="space-y-1">
             <h2 class="text-base font-bold text-slate-900 dark:text-white">
@@ -131,18 +143,29 @@ print(response.json())`
             </UButton>
           </UTooltip>
 
-          <UButton to="/dashboard/subscriptions" color="warning" variant="solid" size="md">
+          <UButton
+            to="/dashboard/subscriptions"
+            color="warning"
+            variant="solid"
+            size="md"
+          >
             Upgrade Subscription Plan
           </UButton>
         </div>
       </div>
 
       <!-- Main API Key Card (for users WITH api:access) -->
-      <div v-else class="p-6 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-xs space-y-6">
+      <div
+        v-else
+        class="p-6 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-xs space-y-6"
+      >
         <div class="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-4">
           <div>
             <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <UIcon name="i-lucide-key-round" class="w-5 h-5 text-emerald-400" />
+              <UIcon
+                name="i-lucide-key-round"
+                class="w-5 h-5 text-emerald-400"
+              />
               Active API Token
             </h2>
             <p class="text-xs text-zinc-500">
@@ -159,14 +182,22 @@ print(response.json())`
         </div>
 
         <!-- No Key Generated Yet -->
-        <div v-if="!apiKeyData?.api_key" class="py-8 text-center space-y-4">
+        <div
+          v-if="!apiKeyData?.api_key"
+          class="py-8 text-center space-y-4"
+        >
           <div class="inline-flex p-4 rounded-full bg-zinc-800 text-zinc-400">
-            <UIcon name="i-lucide-key" class="w-8 h-8" />
+            <UIcon
+              name="i-lucide-key"
+              class="w-8 h-8"
+            />
           </div>
-          <p class="text-sm text-zinc-400">You haven't generated an API token yet.</p>
+          <p class="text-sm text-zinc-400">
+            You haven't generated an API token yet.
+          </p>
           <UButton
             icon="i-lucide-sparkles"
-            color="emerald"
+            color="success"
             variant="solid"
             size="md"
             :loading="generating"
@@ -177,10 +208,16 @@ print(response.json())`
         </div>
 
         <!-- API Key Display Box -->
-        <div v-else class="space-y-4">
+        <div
+          v-else
+          class="space-y-4"
+        >
           <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <div class="flex-1 flex items-center gap-3 p-3.5 bg-zinc-950 rounded-xl border border-zinc-800 font-mono text-sm">
-              <UIcon name="i-lucide-shield-check" class="w-4 h-4 text-emerald-400 shrink-0" />
+              <UIcon
+                name="i-lucide-shield-check"
+                class="w-4 h-4 text-emerald-400 shrink-0"
+              />
               <span class="truncate text-zinc-200">
                 {{ showKey ? apiKeyData.api_key : `${apiKeyData.api_key?.slice(0, 12)}••••••••••••••••••••••••` }}
               </span>
@@ -220,7 +257,10 @@ print(response.json())`
 
           <div class="flex flex-wrap items-center justify-between gap-4 text-xs text-zinc-500 pt-2">
             <div class="flex items-center gap-1.5">
-              <UIcon name="i-lucide-clock" class="w-3.5 h-3.5 text-zinc-400" />
+              <UIcon
+                name="i-lucide-clock"
+                class="w-3.5 h-3.5 text-zinc-400"
+              />
               Created: <span class="text-zinc-300 font-medium">{{ apiKeyData.created_at ? new Date(apiKeyData.created_at).toLocaleDateString() : 'N/A' }}</span>
             </div>
             <div class="text-zinc-400">
@@ -233,7 +273,10 @@ print(response.json())`
       <!-- Quickstart Integration Snippets -->
       <div class="space-y-4">
         <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-          <UIcon name="i-lucide-terminal" class="w-5 h-5 text-indigo-400" />
+          <UIcon
+            name="i-lucide-terminal"
+            class="w-5 h-5 text-indigo-400"
+          />
           Quickstart Integration
         </h2>
 
@@ -242,7 +285,15 @@ print(response.json())`
           <div class="p-5 bg-zinc-900 rounded-2xl border border-zinc-800 space-y-3">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">cURL Command</span>
-              <UButton icon="i-lucide-copy" size="xs" color="neutral" variant="ghost" @click="copyToClipboard(curlExample)">Copy</UButton>
+              <UButton
+                icon="i-lucide-copy"
+                size="xs"
+                color="neutral"
+                variant="ghost"
+                @click="copyToClipboard(curlExample)"
+              >
+                Copy
+              </UButton>
             </div>
             <pre class="p-4 bg-zinc-950 rounded-xl text-xs text-emerald-400 font-mono overflow-x-auto leading-relaxed">{{ curlExample }}</pre>
           </div>
@@ -251,7 +302,15 @@ print(response.json())`
           <div class="p-5 bg-zinc-900 rounded-2xl border border-zinc-800 space-y-3">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Python (Requests)</span>
-              <UButton icon="i-lucide-copy" size="xs" color="neutral" variant="ghost" @click="copyToClipboard(pythonExample)">Copy</UButton>
+              <UButton
+                icon="i-lucide-copy"
+                size="xs"
+                color="neutral"
+                variant="ghost"
+                @click="copyToClipboard(pythonExample)"
+              >
+                Copy
+              </UButton>
             </div>
             <pre class="p-4 bg-zinc-950 rounded-xl text-xs text-emerald-400 font-mono overflow-x-auto leading-relaxed">{{ pythonExample }}</pre>
           </div>
@@ -260,7 +319,10 @@ print(response.json())`
     </template>
 
     <!-- Rotate Token Confirmation Modal -->
-    <UModal v-model:open="showRotateModal" title="Rotate API Token">
+    <UModal
+      v-model:open="showRotateModal"
+      title="Rotate API Token"
+    >
       <template #body>
         <div class="space-y-4 p-1">
           <UAlert
@@ -277,8 +339,20 @@ print(response.json())`
 
       <template #footer>
         <div class="flex justify-end gap-3 w-full">
-          <UButton color="neutral" variant="soft" @click="showRotateModal = false">Cancel</UButton>
-          <UButton color="warning" :loading="generating" @click="handleRotate">Rotate Key Now</UButton>
+          <UButton
+            color="neutral"
+            variant="soft"
+            @click="showRotateModal = false"
+          >
+            Cancel
+          </UButton>
+          <UButton
+            color="warning"
+            :loading="generating"
+            @click="handleRotate"
+          >
+            Rotate Key Now
+          </UButton>
         </div>
       </template>
     </UModal>

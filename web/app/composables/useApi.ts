@@ -21,8 +21,7 @@ export const useApi = () => {
         try {
           const { fetchUser } = useAuth()
           await fetchUser()
-        }
-        catch {
+        } catch {
           await router.push('/login')
         }
       }

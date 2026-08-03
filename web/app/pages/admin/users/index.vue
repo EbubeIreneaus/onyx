@@ -1,11 +1,11 @@
 <script setup lang="ts">
 definePageMeta({
   layout: 'admin',
-  middleware: ['auth'],
+  middleware: ['auth']
 })
 
 useSeoMeta({
-  title: 'Manage Users — Admin',
+  title: 'Manage Users — Admin'
 })
 
 const api = useApi()
@@ -33,11 +33,9 @@ const fetchUsers = async () => {
   try {
     const params = searchQuery.value ? `?search=${encodeURIComponent(searchQuery.value)}` : ''
     users.value = await api<AdminUser[]>(`/api/v1/admin/users${params}`)
-  }
-  catch (err: any) {
+  } catch (err: any) {
     toast.add({ title: 'Error', description: 'Failed to load users list', color: 'error' })
-  }
-  finally {
+  } finally {
     loading.value = false
   }
 }
@@ -51,12 +49,11 @@ const toggleUserStatus = async (user: AdminUser) => {
   try {
     await api(`/api/v1/admin/users/${user.user_id}/status`, {
       method: 'PATCH',
-      body: { status: nextStatus },
+      body: { status: nextStatus }
     })
     user.status = nextStatus
     toast.add({ title: `User ${nextStatus.toLowerCase()} successfully`, color: 'success' })
-  }
-  catch (err: any) {
+  } catch (err: any) {
     toast.add({ title: 'Error', description: err?.data?.detail || 'Failed to update status', color: 'error' })
   }
 }
@@ -66,12 +63,11 @@ const toggleAdminRole = async (user: AdminUser) => {
   try {
     await api(`/api/v1/admin/users/${user.user_id}/role`, {
       method: 'PATCH',
-      body: { is_admin: nextAdmin },
+      body: { is_admin: nextAdmin }
     })
     user.is_admin = nextAdmin
     toast.add({ title: `User admin status updated to ${nextAdmin}`, color: 'success' })
-  }
-  catch (err: any) {
+  } catch (err: any) {
     toast.add({ title: 'Error', description: err?.data?.detail || 'Failed to update role', color: 'error' })
   }
 }
@@ -83,10 +79,15 @@ const toggleAdminRole = async (user: AdminUser) => {
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
         <h1 class="text-2xl font-extrabold text-white flex items-center gap-2">
-          <UIcon name="i-lucide-users" class="w-6 h-6 text-emerald-400" />
+          <UIcon
+            name="i-lucide-users"
+            class="w-6 h-6 text-emerald-400"
+          />
           User Management
         </h1>
-        <p class="text-xs text-zinc-400 mt-1">View, suspend, elevate roles, and inspect user activity.</p>
+        <p class="text-xs text-zinc-400 mt-1">
+          View, suspend, elevate roles, and inspect user activity.
+        </p>
       </div>
 
       <div class="flex items-center gap-3">
@@ -97,45 +98,88 @@ const toggleAdminRole = async (user: AdminUser) => {
           class="w-64"
           @keyup.enter="fetchUsers"
         />
-        <UButton color="neutral" variant="soft" icon="i-lucide-rotate-cw" @click="fetchUsers" />
+        <UButton
+          color="neutral"
+          variant="soft"
+          icon="i-lucide-rotate-cw"
+          @click="fetchUsers"
+        />
       </div>
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="py-16 flex justify-center">
-      <UIcon name="i-lucide-loader-2" class="w-8 h-8 animate-spin text-zinc-500" />
+    <div
+      v-if="loading"
+      class="py-16 flex justify-center"
+    >
+      <UIcon
+        name="i-lucide-loader-2"
+        class="w-8 h-8 animate-spin text-zinc-500"
+      />
     </div>
 
     <!-- Users Table -->
-    <div v-else class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-xs">
+    <div
+      v-else
+      class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-xs"
+    >
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs text-zinc-300">
           <thead class="bg-zinc-950 text-zinc-400 uppercase tracking-wider border-b border-zinc-800">
             <tr>
-              <th class="py-3.5 px-4">User Details</th>
-              <th class="py-3.5 px-4">Subscription Tier</th>
-              <th class="py-3.5 px-4">Role</th>
-              <th class="py-3.5 px-4">Status</th>
-              <th class="py-3.5 px-4">Stats</th>
-              <th class="py-3.5 px-4 text-right">Actions</th>
+              <th class="py-3.5 px-4">
+                User Details
+              </th>
+              <th class="py-3.5 px-4">
+                Subscription Tier
+              </th>
+              <th class="py-3.5 px-4">
+                Role
+              </th>
+              <th class="py-3.5 px-4">
+                Status
+              </th>
+              <th class="py-3.5 px-4">
+                Stats
+              </th>
+              <th class="py-3.5 px-4 text-right">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-zinc-800/60">
-            <tr v-for="u in users" :key="u.id" class="hover:bg-zinc-800/30 transition-colors">
+            <tr
+              v-for="u in users"
+              :key="u.id"
+              class="hover:bg-zinc-800/30 transition-colors"
+            >
               <!-- Name & Email -->
               <td class="py-4 px-4">
                 <div class="flex items-center gap-3">
-                  <UAvatar :alt="u.fullname" size="sm" class="bg-zinc-800 text-zinc-200 shrink-0" />
+                  <UAvatar
+                    :alt="u.fullname"
+                    size="sm"
+                    class="bg-zinc-800 text-zinc-200 shrink-0"
+                  />
                   <div class="min-w-0">
-                    <p class="font-bold text-white truncate">{{ u.fullname }}</p>
-                    <p class="text-zinc-400 text-[11px] font-mono truncate">{{ u.email }}</p>
+                    <p class="font-bold text-white truncate">
+                      {{ u.fullname }}
+                    </p>
+                    <p class="text-zinc-400 text-[11px] font-mono truncate">
+                      {{ u.email }}
+                    </p>
                   </div>
                 </div>
               </td>
 
               <!-- Tier -->
               <td class="py-4 px-4">
-                <UBadge color="info" variant="soft" size="xs" :label="u.tier_name" />
+                <UBadge
+                  color="info"
+                  variant="soft"
+                  size="xs"
+                  :label="u.tier_name"
+                />
               </td>
 
               <!-- Role -->

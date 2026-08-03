@@ -14,7 +14,7 @@ const adminNav = [
   { label: 'Users', icon: 'i-lucide-users', to: '/admin/users' },
   { label: 'Domains', icon: 'i-lucide-globe', to: '/admin/domains' },
   { label: 'Short Links', icon: 'i-lucide-link', to: '/admin/links' },
-  { label: 'Tiers & Pricing', icon: 'i-lucide-layers', to: '/admin/tiers' },
+  { label: 'Tiers & Pricing', icon: 'i-lucide-layers', to: '/admin/tiers' }
 ]
 
 const isActive = (to: string) => {
@@ -30,31 +30,54 @@ watch(() => route.path, () => {
 <template>
   <UApp>
     <!-- Auth Guard Loading -->
-    <div v-if="!user" class="min-h-screen flex items-center justify-center bg-zinc-950 text-white">
+    <div
+      v-if="!user"
+      class="min-h-screen flex items-center justify-center bg-zinc-950 text-white"
+    >
       <div class="flex flex-col items-center gap-3">
         <AppLogo />
-        <UIcon name="i-lucide-loader-2" class="w-5 h-5 animate-spin text-zinc-500 mt-1" />
+        <UIcon
+          name="i-lucide-loader-2"
+          class="w-5 h-5 animate-spin text-zinc-500 mt-1"
+        />
       </div>
     </div>
 
     <!-- Non-Admin Access Warning -->
-    <div v-else-if="!user.is_admin" class="min-h-screen flex items-center justify-center bg-zinc-950 text-white p-6">
+    <div
+      v-else-if="!user.is_admin"
+      class="min-h-screen flex items-center justify-center bg-zinc-950 text-white p-6"
+    >
       <div class="max-w-md text-center space-y-6 bg-zinc-900 border border-zinc-800 p-8 rounded-2xl">
         <div class="inline-flex p-4 rounded-full bg-rose-500/10 text-rose-400">
-          <UIcon name="i-lucide-shield-alert" class="w-10 h-10" />
+          <UIcon
+            name="i-lucide-shield-alert"
+            class="w-10 h-10"
+          />
         </div>
         <div>
-          <h1 class="text-xl font-bold text-white mb-2">Access Denied</h1>
-          <p class="text-sm text-zinc-400">You do not have administrative privileges to access the Admin Portal.</p>
+          <h1 class="text-xl font-bold text-white mb-2">
+            Access Denied
+          </h1>
+          <p class="text-sm text-zinc-400">
+            You do not have administrative privileges to access the Admin Portal.
+          </p>
         </div>
-        <UButton to="/dashboard" color="primary" size="md">
+        <UButton
+          to="/dashboard"
+          color="primary"
+          size="md"
+        >
           Return to Dashboard
         </UButton>
       </div>
     </div>
 
     <!-- Admin Portal Interface -->
-    <div v-else class="min-h-screen flex bg-zinc-950 text-white font-sans">
+    <div
+      v-else
+      class="min-h-screen flex bg-zinc-950 text-white font-sans"
+    >
       <!-- Mobile Overlay -->
       <Transition name="fade">
         <div
@@ -88,7 +111,10 @@ watch(() => route.path, () => {
               ? 'bg-rose-500/10 text-rose-400 font-semibold border border-rose-500/20'
               : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'"
           >
-            <UIcon :name="item.icon" class="w-5 h-5 shrink-0" />
+            <UIcon
+              :name="item.icon"
+              class="w-5 h-5 shrink-0"
+            />
             {{ item.label }}
           </NuxtLink>
         </nav>
@@ -114,8 +140,12 @@ watch(() => route.path, () => {
                 class="bg-rose-500/20 text-rose-400 font-bold shrink-0"
               />
               <div class="min-w-0">
-                <p class="text-xs font-semibold text-white truncate">{{ user?.fullname }}</p>
-                <p class="text-[11px] text-rose-400 font-mono">Administrator</p>
+                <p class="text-xs font-semibold text-white truncate">
+                  {{ user?.fullname }}
+                </p>
+                <p class="text-[11px] text-rose-400 font-mono">
+                  Administrator
+                </p>
               </div>
             </div>
             <UButton
@@ -144,7 +174,11 @@ watch(() => route.path, () => {
           <div class="flex-1" />
 
           <div class="flex items-center gap-3">
-            <UColorModeButton size="sm" color="neutral" variant="ghost" />
+            <UColorModeButton
+              size="sm"
+              color="neutral"
+              variant="ghost"
+            />
           </div>
         </header>
 

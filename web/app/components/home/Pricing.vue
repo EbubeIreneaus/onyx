@@ -14,9 +14,9 @@ const plans = [
       'Basic analytics',
       'Default domain only',
       'Link expiration',
-      '500 clicks/month per link',
+      '500 clicks/month per link'
     ],
-    missing: ['Custom domains', 'Custom paths', 'QR codes', 'API access'],
+    missing: ['Custom domains', 'Custom paths', 'QR codes', 'API access']
   },
   {
     name: 'Pro',
@@ -34,9 +34,9 @@ const plans = [
       '50 Onyx subdomains',
       'Custom paths/slugs',
       'QR code generator',
-      '50,000 clicks/month',
+      '50,000 clicks/month'
     ],
-    missing: ['API access', 'SDK'],
+    missing: ['API access', 'SDK']
   },
   {
     name: 'Enterprise',
@@ -56,20 +56,26 @@ const plans = [
       'QR code generator',
       'REST API access',
       'SDK integration',
-      'Priority support',
+      'Priority support'
     ],
-    missing: [],
-  },
+    missing: []
+  }
 ]
 </script>
 
 <template>
-  <section id="pricing" class="py-24 px-4 sm:px-6 bg-slate-50 dark:bg-slate-950">
+  <section
+    id="pricing"
+    class="py-24 px-4 sm:px-6 bg-slate-50 dark:bg-slate-950"
+  >
     <div class="max-w-7xl mx-auto">
       <!-- Header -->
       <div class="text-center mb-16">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-950/50 text-zinc-700 dark:text-zinc-300 text-sm font-medium mb-4">
-          <UIcon name="i-lucide-tag" class="w-4 h-4" />
+          <UIcon
+            name="i-lucide-tag"
+            class="w-4 h-4"
+          />
           Simple pricing
         </div>
         <h2 class="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-white mb-4">
@@ -92,7 +98,10 @@ const plans = [
             : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-lg'"
         >
           <!-- Popular badge -->
-          <div v-if="plan.badge" class="absolute -top-4 left-1/2 -translate-x-1/2">
+          <div
+            v-if="plan.badge"
+            class="absolute -top-4 left-1/2 -translate-x-1/2"
+          >
             <span
               class="px-4 py-1 text-xs font-bold rounded-full uppercase tracking-widest"
               :class="plan.popular ? 'bg-white text-zinc-700' : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300'"
@@ -133,7 +142,10 @@ const plans = [
             </div>
 
             <!-- CTA button -->
-            <NuxtLink :to="plan.ctaTo" class="mb-8">
+            <NuxtLink
+              :to="plan.ctaTo"
+              class="mb-8"
+            >
               <UButton
                 block
                 size="lg"
@@ -166,7 +178,10 @@ const plans = [
                 class="flex items-center gap-2.5 text-sm"
                 :class="plan.popular ? 'text-zinc-300/60' : 'text-slate-400 dark:text-slate-600'"
               >
-                <UIcon name="i-lucide-minus" class="w-4 h-4 shrink-0" />
+                <UIcon
+                  name="i-lucide-minus"
+                  class="w-4 h-4 shrink-0"
+                />
                 {{ feat }}
               </li>
             </ul>
@@ -176,7 +191,10 @@ const plans = [
 
       <!-- Money-back note -->
       <p class="text-center text-sm text-slate-500 dark:text-slate-400 mt-10">
-        <UIcon name="i-lucide-shield-check" class="w-4 h-4 inline-block mr-1 text-emerald-500" />
+        <UIcon
+          name="i-lucide-shield-check"
+          class="w-4 h-4 inline-block mr-1 text-emerald-500"
+        />
         All paid plans come with a 14-day money-back guarantee. Powered by Paystack.
       </p>
     </div>

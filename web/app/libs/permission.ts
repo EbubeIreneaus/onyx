@@ -1,4 +1,5 @@
 export const availablePermissions = [
+  { label: 'Free Link (free:link)', value: 'free:link' },
   { label: 'AI Analytics (ai:analysis)', value: 'ai:analysis' },
   { label: 'Developer API Access (api:access)', value: 'api:access' },
   { label: 'Custom Domain Access (custom:domain)', value: 'custom:domain' },
@@ -7,5 +8,5 @@ export const availablePermissions = [
   { label: 'Visitor Analytics (visitor:analytics)', value: 'visitor:analytics' },
   { label: 'AI Analytics (ai:analysis)', value: 'ai:analysis' },
   { label: 'QR Image Generator (qrimage)', value: 'qrimage' },
-  { label: 'SDK Access (sdk)', value: 'sdk' },
+  { label: 'SDK Access (sdk)', value: 'sdk' }
 ]

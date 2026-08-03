@@ -81,7 +81,7 @@ watch([effectiveDomain, slug], () => {
         owned_by_user: res.owned_by_user,
         txt_verified: res.txt_verified,
         domain_id: res.domain_id,
-        message: res.message,
+        message: res.message
       }
     }
   }, 400)
@@ -117,7 +117,7 @@ async function handleSubmit() {
     destination: destination.value.trim(),
     domain: effectiveDomain.value,
     slug: hasCustomPath.value && slug.value.trim() ? slug.value.trim() : undefined,
-    type: linkType.value,
+    type: linkType.value
   }
 
   const result = await createLink(payload)
@@ -136,7 +136,10 @@ async function handleSubmit() {
     @update:open="emit('update:open', $event)"
   >
     <template #body>
-      <form class="space-y-5 p-1" @submit.prevent="handleSubmit">
+      <form
+        class="space-y-5 p-1"
+        @submit.prevent="handleSubmit"
+      >
         <!-- Destination URL -->
         <div>
           <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
@@ -158,7 +161,10 @@ async function handleSubmit() {
             <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
               Alias / Custom Path
             </label>
-            <span v-if="!hasCustomPath" class="text-xs text-amber-600 dark:text-amber-400 font-medium">
+            <span
+              v-if="!hasCustomPath"
+              class="text-xs text-amber-600 dark:text-amber-400 font-medium"
+            >
               Requires Custom Path permission
             </span>
           </div>
@@ -231,7 +237,10 @@ async function handleSubmit() {
         </div>
 
         <!-- Onyx Subdomain Input -->
-        <div v-if="linkType === 'subdomain'" class="space-y-2">
+        <div
+          v-if="linkType === 'subdomain'"
+          class="space-y-2"
+        >
           <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
             Subdomain Prefix
           </label>
@@ -249,7 +258,10 @@ async function handleSubmit() {
         </div>
 
         <!-- Custom Domain Input -->
-        <div v-if="linkType === 'custom'" class="space-y-2">
+        <div
+          v-if="linkType === 'custom'"
+          class="space-y-2"
+        >
           <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
             Custom Domain
           </label>
@@ -261,8 +273,14 @@ async function handleSubmit() {
               size="md"
               class="w-full"
             />
-            <div v-if="checkingDomain" class="absolute right-3 top-2.5">
-              <UIcon name="i-lucide-loader-2" class="w-5 h-5 animate-spin text-zinc-500" />
+            <div
+              v-if="checkingDomain"
+              class="absolute right-3 top-2.5"
+            >
+              <UIcon
+                name="i-lucide-loader-2"
+                class="w-5 h-5 animate-spin text-zinc-500"
+              />
             </div>
           </div>
         </div>
@@ -270,8 +288,14 @@ async function handleSubmit() {
         <!-- Domain Availability / Error Feedback Banners -->
         <div v-if="linkType !== 'free' && effectiveDomain">
           <!-- Checking indicator -->
-          <p v-if="checkingDomain" class="text-xs text-slate-400 flex items-center gap-1.5">
-            <UIcon name="i-lucide-loader-2" class="w-3.5 h-3.5 animate-spin" />
+          <p
+            v-if="checkingDomain"
+            class="text-xs text-slate-400 flex items-center gap-1.5"
+          >
+            <UIcon
+              name="i-lucide-loader-2"
+              class="w-3.5 h-3.5 animate-spin"
+            />
             Checking domain availability...
           </p>
 
@@ -281,7 +305,10 @@ async function handleSubmit() {
             class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-xs text-amber-800 dark:text-amber-300 space-y-1.5"
           >
             <div class="flex items-center gap-2 font-medium">
-              <UIcon name="i-lucide-alert-triangle" class="w-4 h-4 text-amber-600 shrink-0" />
+              <UIcon
+                name="i-lucide-alert-triangle"
+                class="w-4 h-4 text-amber-600 shrink-0"
+              />
               <span>Domain not found</span>
             </div>
             <p class="text-amber-700 dark:text-amber-400 leading-relaxed">
@@ -293,7 +320,10 @@ async function handleSubmit() {
               @click="emit('update:open', false)"
             >
               <span>Go to Custom Domains</span>
-              <UIcon name="i-lucide-arrow-right" class="w-3 h-3" />
+              <UIcon
+                name="i-lucide-arrow-right"
+                class="w-3 h-3"
+              />
             </NuxtLink>
           </div>
 
@@ -303,7 +333,10 @@ async function handleSubmit() {
             class="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/50 text-xs text-rose-800 dark:text-rose-300"
           >
             <div class="flex items-center gap-2 font-medium">
-              <UIcon name="i-lucide-x-circle" class="w-4 h-4 text-rose-600 shrink-0" />
+              <UIcon
+                name="i-lucide-x-circle"
+                class="w-4 h-4 text-rose-600 shrink-0"
+              />
               <span>Domain is already in use by another user</span>
             </div>
           </div>
@@ -314,7 +347,10 @@ async function handleSubmit() {
             class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-xs text-amber-800 dark:text-amber-300 space-y-1.5"
           >
             <div class="flex items-center gap-2 font-medium">
-              <UIcon name="i-lucide-shield-alert" class="w-4 h-4 text-amber-600 shrink-0" />
+              <UIcon
+                name="i-lucide-shield-alert"
+                class="w-4 h-4 text-amber-600 shrink-0"
+              />
               <span>Domain DNS TXT record is not verified</span>
             </div>
             <p class="text-amber-700 dark:text-amber-400">
@@ -326,7 +362,10 @@ async function handleSubmit() {
               @click="emit('update:open', false)"
             >
               <span>View Verification Instructions</span>
-              <UIcon name="i-lucide-arrow-right" class="w-3 h-3" />
+              <UIcon
+                name="i-lucide-arrow-right"
+                class="w-3 h-3"
+              />
             </NuxtLink>
           </div>
 
@@ -335,7 +374,10 @@ async function handleSubmit() {
             v-else-if="domainStatus && domainStatus.available"
             class="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2"
           >
-            <UIcon name="i-lucide-check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0" />
+            <UIcon
+              name="i-lucide-check-circle-2"
+              class="w-4 h-4 text-emerald-600 shrink-0"
+            />
             <span>Domain is verified and ready to use!</span>
           </div>
 
@@ -344,7 +386,10 @@ async function handleSubmit() {
             v-else-if="domainStatus && !domainStatus.available && domainStatus.message"
             class="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/50 text-xs text-rose-800 dark:text-rose-300 flex items-center gap-2"
           >
-            <UIcon name="i-lucide-alert-circle" class="w-4 h-4 text-rose-600 shrink-0" />
+            <UIcon
+              name="i-lucide-alert-circle"
+              class="w-4 h-4 text-rose-600 shrink-0"
+            />
             <span>{{ domainStatus.message }}</span>
           </div>
         </div>
@@ -353,7 +398,11 @@ async function handleSubmit() {
 
     <template #footer>
       <div class="flex justify-end gap-2">
-        <UButton color="neutral" variant="ghost" @click="emit('update:open', false)">
+        <UButton
+          color="neutral"
+          variant="ghost"
+          @click="emit('update:open', false)"
+        >
           Cancel
         </UButton>
         <UButton

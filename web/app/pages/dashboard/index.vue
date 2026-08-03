@@ -18,7 +18,7 @@ const stats = computed(() => [
     color: 'text-zinc-600 dark:text-zinc-400',
     bg: 'bg-zinc-50 dark:bg-zinc-950/50',
     change: `+${activeLinks.value.length > 0 ? activeLinks.value.length : 0}`,
-    positive: true,
+    positive: true
   },
   {
     label: 'Total Clicks',
@@ -27,7 +27,7 @@ const stats = computed(() => [
     color: 'text-indigo-600 dark:text-indigo-400',
     bg: 'bg-indigo-50 dark:bg-indigo-950/50',
     change: null,
-    positive: true,
+    positive: true
   },
   {
     label: 'Domains',
@@ -36,7 +36,7 @@ const stats = computed(() => [
     color: 'text-blue-600 dark:text-blue-400',
     bg: 'bg-blue-50 dark:bg-blue-950/50',
     change: null,
-    positive: true,
+    positive: true
   },
   {
     label: 'Subscription',
@@ -45,8 +45,8 @@ const stats = computed(() => [
     color: 'text-amber-600 dark:text-amber-400',
     bg: 'bg-amber-50 dark:bg-amber-950/50',
     change: null,
-    positive: true,
-  },
+    positive: true
+  }
 ])
 
 // Quick create
@@ -80,14 +80,30 @@ const recentLinks = computed(() => [...links.value].slice(0, 8))
     <!-- Welcome banner -->
     <div class="mb-8 p-6 rounded-md bg-zinc-900 dark:bg-zinc-950 text-white relative overflow-hidden border border-zinc-800">
       <div class="relative z-10">
-        <p class="text-zinc-400 text-sm mb-1">Good day 👋</p>
-        <h1 class="text-2xl font-bold mb-4 text-zinc-100">{{ user?.fullname }}</h1>
+        <p class="text-zinc-400 text-sm mb-1">
+          Good day 👋
+        </p>
+        <h1 class="text-2xl font-bold mb-4 text-zinc-100">
+          {{ user?.fullname }}
+        </h1>
         <div class="flex flex-wrap gap-3">
-          <UButton color="neutral" size="sm" class="rounded-md" icon="i-lucide-plus" @click="showCreate = !showCreate">
+          <UButton
+            color="neutral"
+            size="sm"
+            class="rounded-md"
+            icon="i-lucide-plus"
+            @click="showCreate = !showCreate"
+          >
             Create link
           </UButton>
           <NuxtLink to="/dashboard/links">
-            <UButton color="neutral" variant="ghost" size="sm" class="rounded-md text-white border-zinc-700 hover:bg-zinc-800" trailing-icon="i-lucide-arrow-right">
+            <UButton
+              color="neutral"
+              variant="ghost"
+              size="sm"
+              class="rounded-md text-white border-zinc-700 hover:bg-zinc-800"
+              trailing-icon="i-lucide-arrow-right"
+            >
               View all links
             </UButton>
           </NuxtLink>
@@ -96,7 +112,10 @@ const recentLinks = computed(() => [...links.value].slice(0, 8))
     </div>
 
     <!-- Create Link Modal -->
-    <CreateLinkModal v-model:open="showCreate" @created="fetchLinks" />
+    <CreateLinkModal
+      v-model:open="showCreate"
+      @created="fetchLinks"
+    />
 
     <!-- Stats grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -106,43 +125,86 @@ const recentLinks = computed(() => [...links.value].slice(0, 8))
         class="p-5 rounded-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
       >
         <div class="flex items-start justify-between mb-4">
-          <div class="inline-flex p-2.5 rounded-md" :class="stat.bg">
-            <UIcon :name="stat.icon" class="w-5 h-5" :class="stat.color" />
+          <div
+            class="inline-flex p-2.5 rounded-md"
+            :class="stat.bg"
+          >
+            <UIcon
+              :name="stat.icon"
+              class="w-5 h-5"
+              :class="stat.color"
+            />
           </div>
         </div>
-        <p class="text-2xl font-bold text-slate-900 dark:text-white mb-1">{{ stat.value }}</p>
-        <p class="text-sm text-slate-500 dark:text-slate-400">{{ stat.label }}</p>
+        <p class="text-2xl font-bold text-slate-900 dark:text-white mb-1">
+          {{ stat.value }}
+        </p>
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+          {{ stat.label }}
+        </p>
       </div>
     </div>
 
     <!-- Recent links -->
     <div class="bg-white dark:bg-zinc-900 rounded-md border border-zinc-200 dark:border-zinc-800">
       <div class="flex items-center justify-between p-5 border-b border-zinc-200 dark:border-zinc-800">
-        <h3 class="font-semibold text-slate-900 dark:text-white">Recent Links</h3>
+        <h3 class="font-semibold text-slate-900 dark:text-white">
+          Recent Links
+        </h3>
         <NuxtLink to="/dashboard/links">
-          <UButton size="xs" color="neutral" variant="ghost" trailing-icon="i-lucide-arrow-right">
+          <UButton
+            size="xs"
+            color="neutral"
+            variant="ghost"
+            trailing-icon="i-lucide-arrow-right"
+          >
             View all
           </UButton>
         </NuxtLink>
       </div>
 
       <!-- Loading -->
-      <div v-if="pending" class="p-8 flex justify-center">
-        <UIcon name="i-lucide-loader-2" class="w-6 h-6 animate-spin text-zinc-500" />
+      <div
+        v-if="pending"
+        class="p-8 flex justify-center"
+      >
+        <UIcon
+          name="i-lucide-loader-2"
+          class="w-6 h-6 animate-spin text-zinc-500"
+        />
       </div>
 
       <!-- Empty -->
-      <div v-else-if="!recentLinks.length" class="p-12 text-center">
+      <div
+        v-else-if="!recentLinks.length"
+        class="p-12 text-center"
+      >
         <div class="inline-flex p-4 rounded-md bg-zinc-50 dark:bg-zinc-950/40 mb-4">
-          <UIcon name="i-lucide-link" class="w-8 h-8 text-zinc-500" />
+          <UIcon
+            name="i-lucide-link"
+            class="w-8 h-8 text-zinc-500"
+          />
         </div>
-        <p class="text-slate-900 dark:text-white font-semibold mb-1">No links yet</p>
-        <p class="text-slate-500 text-sm mb-4">Create your first short link to get started.</p>
-        <UButton size="sm" icon="i-lucide-plus" @click="showCreate = true">Create link</UButton>
+        <p class="text-slate-900 dark:text-white font-semibold mb-1">
+          No links yet
+        </p>
+        <p class="text-slate-500 text-sm mb-4">
+          Create your first short link to get started.
+        </p>
+        <UButton
+          size="sm"
+          icon="i-lucide-plus"
+          @click="showCreate = true"
+        >
+          Create link
+        </UButton>
       </div>
 
       <!-- Table -->
-      <div v-else class="divide-y divide-slate-100 dark:divide-slate-800">
+      <div
+        v-else
+        class="divide-y divide-slate-100 dark:divide-slate-800"
+      >
         <div
           v-for="link in recentLinks"
           :key="link.redirect_id"
@@ -150,7 +212,10 @@ const recentLinks = computed(() => [...links.value].slice(0, 8))
         >
           <!-- Link icon -->
           <div class="shrink-0 w-9 h-9 rounded-xl bg-zinc-50 dark:bg-zinc-950/40 flex items-center justify-center">
-            <UIcon name="i-lucide-link-2" class="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
+            <UIcon
+              name="i-lucide-link-2"
+              class="w-4 h-4 text-zinc-600 dark:text-zinc-400"
+            />
           </div>
 
           <!-- Link info -->
@@ -166,11 +231,17 @@ const recentLinks = computed(() => [...links.value].slice(0, 8))
           <!-- Stats -->
           <div class="hidden sm:flex items-center gap-4 shrink-0">
             <div class="text-center">
-              <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ link.visitor_count || 0 }}</p>
-              <p class="text-xs text-slate-400">clicks</p>
+              <p class="text-sm font-semibold text-slate-900 dark:text-white">
+                {{ link.visitor_count || 0 }}
+              </p>
+              <p class="text-xs text-slate-400">
+                clicks
+              </p>
             </div>
             <div class="text-center">
-              <p class="text-xs text-slate-400">{{ formatDate(link.created_at) }}</p>
+              <p class="text-xs text-slate-400">
+                {{ formatDate(link.created_at) }}
+              </p>
             </div>
           </div>
 
@@ -185,8 +256,20 @@ const recentLinks = computed(() => [...links.value].slice(0, 8))
 
           <!-- Actions (appear on hover) -->
           <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-            <UButton icon="i-lucide-copy" size="xs" color="neutral" variant="ghost" @click="copyLink(link)" />
-            <UButton icon="i-lucide-trash-2" size="xs" color="error" variant="ghost" @click="deleteLink(link.redirect_id)" />
+            <UButton
+              icon="i-lucide-copy"
+              size="xs"
+              color="neutral"
+              variant="ghost"
+              @click="copyLink(link)"
+            />
+            <UButton
+              icon="i-lucide-trash-2"
+              size="xs"
+              color="error"
+              variant="ghost"
+              @click="deleteLink(link.redirect_id)"
+            />
           </div>
         </div>
       </div>

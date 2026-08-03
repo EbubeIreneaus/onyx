@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import {availablePermissions} from '@/libs/permission'
+import { availablePermissions } from '@/libs/permission'
 
 definePageMeta({
   layout: 'admin',
-  middleware: ['auth'],
+  middleware: ['auth']
 })
 
 useSeoMeta({
-  title: 'Manage Tiers & Pricing — Admin',
+  title: 'Manage Tiers & Pricing — Admin'
 })
-
 
 const api = useApi()
 const toast = useToast()
@@ -37,8 +36,6 @@ const showEditModal = ref(false)
 const selectedTier = ref<AdminTier | null>(null)
 const submitting = ref(false)
 
-
-
 const form = ref({
   name: '',
   price: 0,
@@ -50,24 +47,21 @@ const form = ref({
   max_custom_paths: '10',
   max_visits_per_shortlink: '1000',
   description: '',
-  is_active: true,
+  is_active: true
 })
 
 const fetchTiers = async () => {
   loading.value = true
   try {
     tiers.value = await api<AdminTier[]>('/api/v1/admin/tiers')
-  }
-  catch (err: any) {
+  } catch (err: any) {
     toast.add({ title: 'Error', description: 'Failed to load subscription tiers', color: 'error' })
-  }
-  finally {
+  } finally {
     loading.value = false
   }
 }
 
-  fetchTiers()
-
+fetchTiers()
 
 const resetForm = () => {
   form.value = {
@@ -81,7 +75,7 @@ const resetForm = () => {
     max_custom_paths: '10',
     max_visits_per_shortlink: '1000',
     description: '',
-    is_active: true,
+    is_active: true
   }
 }
 
@@ -96,16 +90,14 @@ const handleCreateTier = async () => {
   try {
     const newTier = await api<AdminTier>('/api/v1/admin/tiers', {
       method: 'POST',
-      body: form.value,
+      body: form.value
     })
     tiers.value.push(newTier)
     showCreateModal.value = false
     toast.add({ title: 'Tier Created', description: `Subscription tier '${newTier.name}' created successfully!`, color: 'success' })
-  }
-  catch (err: any) {
+  } catch (err: any) {
     toast.add({ title: 'Error', description: err?.data?.detail || 'Failed to create tier', color: 'error' })
-  }
-  finally {
+  } finally {
     submitting.value = false
   }
 }
@@ -123,7 +115,7 @@ const openEdit = (tier: AdminTier) => {
     max_custom_paths: String(tier.max_custom_paths),
     max_visits_per_shortlink: String(tier.max_visits_per_shortlink),
     description: '',
-    is_active: tier.is_active,
+    is_active: tier.is_active
   }
   showEditModal.value = true
 }
@@ -134,17 +126,15 @@ const handleUpdateTier = async () => {
   try {
     const updated = await api<AdminTier>(`/api/v1/admin/tiers/${selectedTier.value.tier_id}`, {
       method: 'PATCH',
-      body: form.value,
+      body: form.value
     })
     const idx = tiers.value.findIndex(t => t.tier_id === selectedTier.value?.tier_id)
     if (idx !== -1) tiers.value[idx] = updated
     showEditModal.value = false
     toast.add({ title: 'Tier Updated', color: 'success' })
-  }
-  catch (err: any) {
+  } catch (err: any) {
     toast.add({ title: 'Error', description: err?.data?.detail || 'Failed to update tier', color: 'error' })
-  }
-  finally {
+  } finally {
     submitting.value = false
   }
 }
@@ -155,8 +145,7 @@ const handleDeleteTier = async (tier: AdminTier) => {
     await api(`/api/v1/admin/tiers/${tier.tier_id}`, { method: 'DELETE' })
     tiers.value = tiers.value.filter(t => t.tier_id !== tier.tier_id)
     toast.add({ title: 'Tier Deleted', color: 'success' })
-  }
-  catch (err: any) {
+  } catch (err: any) {
     toast.add({ title: 'Error', description: err?.data?.detail || 'Failed to delete tier', color: 'error' })
   }
 }
@@ -168,24 +157,44 @@ const handleDeleteTier = async (tier: AdminTier) => {
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-2xl font-extrabold text-white flex items-center gap-2">
-          <UIcon name="i-lucide-layers" class="w-6 h-6 text-amber-400" />
+          <UIcon
+            name="i-lucide-layers"
+            class="w-6 h-6 text-amber-400"
+          />
           Subscription Tiers & Pricing
         </h1>
-        <p class="text-xs text-zinc-400 mt-1">Configure subscription plans, set tier quotas, assign permissions, and sync with Paystack.</p>
+        <p class="text-xs text-zinc-400 mt-1">
+          Configure subscription plans, set tier quotas, assign permissions, and sync with Paystack.
+        </p>
       </div>
 
-      <UButton icon="i-lucide-plus" color="secondary" variant="solid" size="md" @click="openCreate">
+      <UButton
+        icon="i-lucide-plus"
+        color="secondary"
+        variant="solid"
+        size="md"
+        @click="openCreate"
+      >
         Create New Tier
       </UButton>
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="py-16 flex justify-center">
-      <UIcon name="i-lucide-loader-2" class="w-8 h-8 animate-spin text-zinc-500" />
+    <div
+      v-if="loading"
+      class="py-16 flex justify-center"
+    >
+      <UIcon
+        name="i-lucide-loader-2"
+        class="w-8 h-8 animate-spin text-zinc-500"
+      />
     </div>
 
     <!-- Tiers Grid -->
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div
+      v-else
+      class="grid grid-cols-1 md:grid-cols-2 gap-6"
+    >
       <div
         v-for="t in tiers"
         :key="t.id"
@@ -202,9 +211,26 @@ const handleDeleteTier = async (tier: AdminTier) => {
           </div>
 
           <div class="flex items-center gap-2">
-            <UBadge :color="t.is_active ? 'success' : 'neutral'" variant="soft" size="xs" :label="t.is_active ? 'Active' : 'Disabled'" />
-            <UButton icon="i-lucide-edit-3" color="neutral" variant="ghost" size="xs" @click="openEdit(t)" />
-            <UButton icon="i-lucide-trash-2" color="error" variant="ghost" size="xs" @click="handleDeleteTier(t)" />
+            <UBadge
+              :color="t.is_active ? 'success' : 'neutral'"
+              variant="soft"
+              size="xs"
+              :label="t.is_active ? 'Active' : 'Disabled'"
+            />
+            <UButton
+              icon="i-lucide-edit-3"
+              color="neutral"
+              variant="ghost"
+              size="xs"
+              @click="openEdit(t)"
+            />
+            <UButton
+              icon="i-lucide-trash-2"
+              color="error"
+              variant="ghost"
+              size="xs"
+              @click="handleDeleteTier(t)"
+            />
           </div>
         </div>
 
@@ -245,33 +271,52 @@ const handleDeleteTier = async (tier: AdminTier) => {
     </div>
 
     <!-- Create Tier Modal -->
-    <UModal v-model:open="showCreateModal" title="Create Subscription Tier">
+    <UModal
+      v-model:open="showCreateModal"
+      title="Create Subscription Tier"
+    >
       <template #body>
         <div class="space-y-4 max-h-[70vh] overflow-y-auto p-1 text-xs">
           <div>
             <label class="block text-zinc-400 mb-1 font-bold">Tier Name</label>
-            <UInput v-model="form.name" placeholder="e.g. pro, business, enterprise" />
+            <UInput
+              v-model="form.name"
+              placeholder="e.g. pro, business, enterprise"
+            />
           </div>
 
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-zinc-400 mb-1 font-bold">Price ($ USD)</label>
-              <UInput v-model.number="form.price" type="number" step="0.01" />
+              <UInput
+                v-model.number="form.price"
+                type="number"
+                step="0.01"
+              />
             </div>
             <div>
               <label class="block text-zinc-400 mb-1 font-bold">Max Short Links</label>
-              <UInput v-model="form.max_short_link" placeholder="100 or unlimited" />
+              <UInput
+                v-model="form.max_short_link"
+                placeholder="100 or unlimited"
+              />
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-zinc-400 mb-1 font-bold">Link Durability (days)</label>
-              <UInput v-model="form.link_durability" placeholder="14 or forever" />
+              <UInput
+                v-model="form.link_durability"
+                placeholder="14 or forever"
+              />
             </div>
             <div>
               <label class="block text-zinc-400 mb-1 font-bold">Max Custom Domains</label>
-              <UInput v-model="form.max_custom_domains" placeholder="1 or unlimited" />
+              <UInput
+                v-model="form.max_custom_domains"
+                placeholder="1 or unlimited"
+              />
             </div>
           </div>
 
@@ -298,14 +343,29 @@ const handleDeleteTier = async (tier: AdminTier) => {
 
       <template #footer>
         <div class="flex justify-end gap-3 w-full">
-          <UButton color="neutral" variant="soft" @click="showCreateModal = false">Cancel</UButton>
-          <UButton color="primary" :loading="submitting" @click="handleCreateTier">Save & Sync Paystack</UButton>
+          <UButton
+            color="neutral"
+            variant="soft"
+            @click="showCreateModal = false"
+          >
+            Cancel
+          </UButton>
+          <UButton
+            color="primary"
+            :loading="submitting"
+            @click="handleCreateTier"
+          >
+            Save & Sync Paystack
+          </UButton>
         </div>
       </template>
     </UModal>
 
     <!-- Edit Tier Modal -->
-    <UModal v-model:open="showEditModal" title="Edit Subscription Tier">
+    <UModal
+      v-model:open="showEditModal"
+      title="Edit Subscription Tier"
+    >
       <template #body>
         <div class="space-y-4 max-h-[70vh] overflow-y-auto p-1 text-xs">
           <div>
@@ -316,7 +376,11 @@ const handleDeleteTier = async (tier: AdminTier) => {
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-zinc-400 mb-1 font-bold">Price ($ USD)</label>
-              <UInput v-model.number="form.price" type="number" step="0.01" />
+              <UInput
+                v-model.number="form.price"
+                type="number"
+                step="0.01"
+              />
             </div>
             <div>
               <label class="block text-zinc-400 mb-1 font-bold">Max Short Links</label>
@@ -358,8 +422,20 @@ const handleDeleteTier = async (tier: AdminTier) => {
 
       <template #footer>
         <div class="flex justify-end gap-3 w-full">
-          <UButton color="neutral" variant="soft" @click="showEditModal = false">Cancel</UButton>
-          <UButton color="primary" :loading="submitting" @click="handleUpdateTier">Update & Sync Paystack</UButton>
+          <UButton
+            color="neutral"
+            variant="soft"
+            @click="showEditModal = false"
+          >
+            Cancel
+          </UButton>
+          <UButton
+            color="primary"
+            :loading="submitting"
+            @click="handleUpdateTier"
+          >
+            Update & Sync Paystack
+          </UButton>
         </div>
       </template>
     </UModal>

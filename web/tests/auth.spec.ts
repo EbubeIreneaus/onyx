@@ -1,6 +1,6 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect, type Page } from '@playwright/test'
 
-const API_HOSTS = ["http://localhost:8000", "http://127.0.0.1:8000"];
+const API_HOSTS = ['http://localhost:8000', 'http://127.0.0.1:8000']
 
 async function mockApiRoutes(page: Page, email: string) {
   let isLoggedIn = false
@@ -9,7 +9,7 @@ async function mockApiRoutes(page: Page, email: string) {
     'access-control-allow-origin': 'http://localhost:3000',
     'access-control-allow-credentials': 'true',
     'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'access-control-allow-headers': 'Content-Type, Authorization, Cookie',
+    'access-control-allow-headers': 'Content-Type, Authorization, Cookie'
   }
 
   const mockUser = {
@@ -20,7 +20,7 @@ async function mockApiRoutes(page: Page, email: string) {
     status: 'active',
     email_verified: true,
     created_at: new Date().toISOString(),
-    current_subscription: null,
+    current_subscription: null
   }
 
   for (const host of API_HOSTS) {
@@ -37,7 +37,7 @@ async function mockApiRoutes(page: Page, email: string) {
           status: 200,
           headers: corsHeaders,
           contentType: 'application/json',
-          body: JSON.stringify({ success: true }),
+          body: JSON.stringify({ success: true })
         })
       }
       if (url.includes('/api/v1/auth/me') || url.includes('/api/v1/auth/refresh-token')) {
@@ -46,67 +46,60 @@ async function mockApiRoutes(page: Page, email: string) {
             status: 401,
             headers: corsHeaders,
             contentType: 'application/json',
-            body: JSON.stringify({ detail: 'Unauthenticated' }),
+            body: JSON.stringify({ detail: 'Unauthenticated' })
           })
         }
         return route.fulfill({
           status: 200,
           headers: corsHeaders,
           contentType: 'application/json',
-          body: JSON.stringify(url.includes('/refresh-token') ? { success: true } : mockUser),
+          body: JSON.stringify(url.includes('/refresh-token') ? { success: true } : mockUser)
         })
       }
       return route.fulfill({
         status: 200,
         headers: corsHeaders,
         contentType: 'application/json',
-        body: JSON.stringify([]),
+        body: JSON.stringify([])
       })
     })
   }
 }
 
-async function typeInto(page: Page, placeholder: string, value: string) {
-  const input = page.getByPlaceholder(placeholder);
-  await input.click();
-  await input.pressSequentially(value, { delay: 30 });
-}
-
-test("signup flow works", async ({ page }) => {
-
+test('signup flow works', async ({ page }) => {
   await page.context().clearCookies()
 
-  const email = `playwright-${Date.now()}@example.com`;
+  const email = `playwright-${Date.now()}@example.com`
   await mockApiRoutes(page, email)
 
-  await page.goto("http://localhost:3000/signup");
+  await page.goto('http://localhost:3000/signup')
 
   await page.waitForLoadState('networkidle')
 
-  await page.getByTestId("fullname").fill("Playwright User");
-  await page.getByTestId("email").fill(email);
-  await page.getByTestId("password").fill("StrongPass123");
-  await page.getByTestId("confirm-password").fill("StrongPass123");
+  await page.getByTestId('fullname').fill('Playwright User')
+  await page.getByTestId('email').fill(email)
+  await page.getByTestId('password').fill('StrongPass123')
+  await page.getByTestId('confirm-password').fill('StrongPass123')
 
   // User added test-id="submit-btn" to the UButton — use it for reliable clicking
-  await page.getByTestId("submit-btn").click();
+  await page.getByTestId('submit-btn').click()
 
-  await expect(page).toHaveURL("http://localhost:3000/dashboard");
-});
+  await expect(page).toHaveURL('http://localhost:3000/dashboard')
+})
 
-test("login flow works", async ({ page }) => {
-  const email = `playwright-${Date.now()}@example.com`;
+test('login flow works', async ({ page }) => {
+  const email = `playwright-${Date.now()}@example.com`
   await mockApiRoutes(page, email)
 
-  await page.goto("/login");
+  await page.goto('/login')
 
   await page.waitForLoadState('networkidle')
 
-  await page.getByTestId("email").fill(email)
-  await page.getByTestId("password").fill("StrongPass123")
+  await page.getByTestId('email').fill(email)
+  await page.getByTestId('password').fill('StrongPass123')
 
-  await page.getByTestId("submit-btn").click();
+  await page.getByTestId('submit-btn').click()
 
-  await page.waitForURL(/\/dashboard/, { timeout: 15000 });
-  await expect(page).toHaveURL(/\/dashboard/);
-});
+  await page.waitForURL(/\/dashboard/, { timeout: 15000 })
+  await expect(page).toHaveURL(/\/dashboard/)
+})

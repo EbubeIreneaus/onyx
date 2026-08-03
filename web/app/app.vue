@@ -19,7 +19,7 @@ useSeoMeta({
   ogImage: '/og-image.png',
   twitterCard: 'summary_large_image',
   twitterTitle: 'Onyx — Smart URL Shortener',
-  twitterDescription: 'Shorten, track, and manage your links with Onyx.',
+  twitterDescription: 'Shorten, track, and manage your links with Onyx.'
 })
 </script>
 

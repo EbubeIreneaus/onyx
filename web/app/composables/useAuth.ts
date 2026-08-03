@@ -24,6 +24,7 @@ export interface UserOut {
   email: string
   status: string
   email_verified: boolean
+  is_admin?: boolean
   created_at: string
   current_subscription: SubscriptionOut | null
 }
@@ -52,30 +53,27 @@ export const useAuth = () => {
         const res = await $fetch<UserOut>('/api/v1/auth/me', {
           baseURL: apiBase,
           credentials: 'include',
-          headers,
+          headers
         })
         user.value = res
-      }
-      catch {
+      } catch {
         try {
           await $fetch('/api/v1/auth/refresh-token', {
             method: 'POST',
             baseURL: apiBase,
             credentials: 'include',
-            headers,
+            headers
           })
           const res = await $fetch<UserOut>('/api/v1/auth/me', {
             baseURL: apiBase,
             credentials: 'include',
-            headers,
+            headers
           })
           user.value = res
-        }
-        catch {
+        } catch {
           user.value = null
         }
-      }
-      finally {
+      } finally {
         fetchUserPromise = null
       }
     })()
@@ -90,19 +88,17 @@ export const useAuth = () => {
         method: 'POST',
         baseURL: apiBase,
         credentials: 'include',
-        body: { fullname, email, password },
+        body: { fullname, email, password }
       })
       if (res.success) {
         await fetchUser()
         await router.push('/dashboard')
       }
-    }
-    catch (err: any) {
+    } catch (err: any) {
       const msg = err?.data?.detail || 'Signup failed. Please try again.'
       toast.add({ title: 'Error', description: msg, color: 'error' })
       throw err
-    }
-    finally {
+    } finally {
       loading.value = false
     }
   }
@@ -115,19 +111,17 @@ export const useAuth = () => {
         method: 'POST',
         baseURL: apiBase,
         credentials: 'include',
-        body: { email, password },
+        body: { email, password }
       })
       if (res.success) {
         await fetchUser()
         await router.push('/dashboard')
       }
-    }
-    catch (err: any) {
+    } catch (err: any) {
       const msg = err?.data?.detail || 'Invalid email or password.'
       toast.add({ title: 'Sign In Failed', description: msg, color: 'error' })
       throw err
-    }
-    finally {
+    } finally {
       loading.value = false
     }
   }
@@ -138,11 +132,9 @@ export const useAuth = () => {
       await $fetch('/api/v1/auth/signout', {
         method: 'POST',
         baseURL: apiBase,
-        credentials: 'include',
+        credentials: 'include'
       })
-    }
-    catch { /* swallow */ }
-    finally {
+    } catch { /* swallow */ } finally {
       user.value = null
       await router.push('/login')
     }
@@ -157,6 +149,6 @@ export const useAuth = () => {
     restore: fetchUser,
     signup,
     signin,
-    signout,
+    signout
   }
 }

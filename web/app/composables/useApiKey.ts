@@ -17,11 +17,9 @@ export const useApiKey = () => {
     try {
       const res = await api<ApiKeyData>('/api/v1/client/api-key')
       apiKeyData.value = res
-    }
-    catch (err: any) {
+    } catch (err: any) {
       // ignore
-    }
-    finally {
+    } finally {
       loading.value = false
     }
   }
@@ -30,27 +28,24 @@ export const useApiKey = () => {
     generating.value = true
     try {
       const res = await api<{ api_key: string, message: string }>('/api/v1/client/api-key/generate', {
-        method: 'POST',
+        method: 'POST'
       })
       if (apiKeyData.value) {
         apiKeyData.value.api_key = res.api_key
         apiKeyData.value.created_at = new Date().toISOString()
-      }
-      else {
+      } else {
         apiKeyData.value = {
           api_key: res.api_key,
           has_api_access: true,
-          created_at: new Date().toISOString(),
+          created_at: new Date().toISOString()
         }
       }
       toast.add({ title: 'API Key Generated', description: res.message, color: 'success' })
       return res.api_key
-    }
-    catch (err: any) {
+    } catch (err: any) {
       toast.add({ title: 'Error', description: err?.data?.detail || 'Failed to generate API key.', color: 'error' })
       return null
-    }
-    finally {
+    } finally {
       generating.value = false
     }
   }
@@ -59,7 +54,7 @@ export const useApiKey = () => {
     generating.value = true
     try {
       const res = await api<{ api_key: string, message: string }>('/api/v1/client/api-key/rotate', {
-        method: 'POST',
+        method: 'POST'
       })
       if (apiKeyData.value) {
         apiKeyData.value.api_key = res.api_key
@@ -67,12 +62,10 @@ export const useApiKey = () => {
       }
       toast.add({ title: 'API Key Rotated', description: res.message, color: 'success' })
       return res.api_key
-    }
-    catch (err: any) {
+    } catch (err: any) {
       toast.add({ title: 'Error', description: err?.data?.detail || 'Failed to rotate API key.', color: 'error' })
       return null
-    }
-    finally {
+    } finally {
       generating.value = false
     }
   }
@@ -85,8 +78,7 @@ export const useApiKey = () => {
         apiKeyData.value.created_at = null
       }
       toast.add({ title: 'API Key Revoked', color: 'success' })
-    }
-    catch (err: any) {
+    } catch (err: any) {
       toast.add({ title: 'Error', description: err?.data?.detail || 'Failed to revoke key.', color: 'error' })
     }
   }
@@ -98,6 +90,6 @@ export const useApiKey = () => {
     fetchApiKey,
     generateApiKey,
     rotateApiKey,
-    revokeApiKey,
+    revokeApiKey
   }
 }

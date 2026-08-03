@@ -34,7 +34,9 @@ function formatDate(d: string) {
     <!-- Header row -->
     <div class="flex items-center justify-between mb-6">
       <div>
-        <h3 class="text-base font-semibold text-slate-900 dark:text-white">Custom Domains</h3>
+        <h3 class="text-base font-semibold text-slate-900 dark:text-white">
+          Custom Domains
+        </h3>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
           Register and verify custom domains for branded short links.
         </p>
@@ -51,31 +53,59 @@ function formatDate(d: string) {
     <!-- Stats -->
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
       <div class="p-4 rounded-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-center">
-        <p class="text-2xl font-bold text-slate-900 dark:text-white">{{ domains.length }}</p>
-        <p class="text-xs text-slate-500 mt-0.5">Total domains</p>
+        <p class="text-2xl font-bold text-slate-900 dark:text-white">
+          {{ domains.length }}
+        </p>
+        <p class="text-xs text-slate-500 mt-0.5">
+          Total domains
+        </p>
       </div>
       <div class="p-4 rounded-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-center">
-        <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ verifiedDomains.length }}</p>
-        <p class="text-xs text-slate-500 mt-0.5">Verified</p>
+        <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+          {{ verifiedDomains.length }}
+        </p>
+        <p class="text-xs text-slate-500 mt-0.5">
+          Verified
+        </p>
       </div>
       <div class="p-4 rounded-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-center">
-        <p class="text-2xl font-bold text-amber-600 dark:text-amber-400">{{ pendingDomains.length }}</p>
-        <p class="text-xs text-slate-500 mt-0.5">Pending verification</p>
+        <p class="text-2xl font-bold text-amber-600 dark:text-amber-400">
+          {{ pendingDomains.length }}
+        </p>
+        <p class="text-xs text-slate-500 mt-0.5">
+          Pending verification
+        </p>
       </div>
     </div>
 
     <!-- Loading -->
-    <div v-if="pending" class="py-12 flex justify-center">
-      <UIcon name="i-lucide-loader-2" class="w-7 h-7 animate-spin text-zinc-500" />
+    <div
+      v-if="pending"
+      class="py-12 flex justify-center"
+    >
+      <UIcon
+        name="i-lucide-loader-2"
+        class="w-7 h-7 animate-spin text-zinc-500"
+      />
     </div>
 
     <!-- Empty -->
-    <div v-else-if="!domains.length" class="py-14 text-center">
+    <div
+      v-else-if="!domains.length"
+      class="py-14 text-center"
+    >
       <div class="inline-flex p-5 rounded-md bg-zinc-50 dark:bg-zinc-950/40 mb-4">
-        <UIcon name="i-lucide-globe" class="w-10 h-10 text-zinc-500" />
+        <UIcon
+          name="i-lucide-globe"
+          class="w-10 h-10 text-zinc-500"
+        />
       </div>
-      <p class="text-lg font-semibold text-slate-900 dark:text-white mb-1">No domains registered</p>
-      <p class="text-slate-500 text-sm mb-5">Add a custom domain to create branded short links.</p>
+      <p class="text-lg font-semibold text-slate-900 dark:text-white mb-1">
+        No domains registered
+      </p>
+      <p class="text-slate-500 text-sm mb-5">
+        Add a custom domain to create branded short links.
+      </p>
       <PermissionButton
         permission="custom:domain"
         label="Add domain"
@@ -85,14 +115,18 @@ function formatDate(d: string) {
     </div>
 
     <!-- Domains list -->
-    <div v-else class="space-y-3">
+    <div
+      v-else
+      class="space-y-3"
+    >
       <div
         v-for="domain in domains"
         :key="domain.id"
         class="flex items-center gap-4 p-4 bg-white dark:bg-zinc-900 rounded-md border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-200 group"
       >
         <!-- Icon -->
-        <div class="shrink-0 w-10 h-10 rounded-md flex items-center justify-center"
+        <div
+          class="shrink-0 w-10 h-10 rounded-md flex items-center justify-center"
           :class="domain.txt_verified ? 'bg-emerald-50 dark:bg-emerald-950/40' : 'bg-amber-50 dark:bg-amber-950/40'"
         >
           <UIcon
@@ -104,10 +138,15 @@ function formatDate(d: string) {
 
         <!-- Domain info -->
         <div class="flex-1 min-w-0">
-          <NuxtLink :to="`/dashboard/domains/${domain.id}`" class="text-sm font-semibold text-slate-900 dark:text-white hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+          <NuxtLink
+            :to="`/dashboard/domains/${domain.id}`"
+            class="text-sm font-semibold text-slate-900 dark:text-white hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
+          >
             {{ domain.name }}
           </NuxtLink>
-          <p class="text-xs text-slate-400 mt-0.5">Added {{ formatDate(domain.created_at) }}</p>
+          <p class="text-xs text-slate-400 mt-0.5">
+            Added {{ formatDate(domain.created_at) }}
+          </p>
         </div>
 
         <!-- Status badges -->
@@ -139,7 +178,10 @@ function formatDate(d: string) {
     </div>
 
     <!-- Add Domain Modal -->
-    <UModal v-model:open="showModal" title="Add Custom Domain">
+    <UModal
+      v-model:open="showModal"
+      title="Add Custom Domain"
+    >
       <template #body>
         <div class="space-y-4 p-1">
           <UAlert
@@ -163,8 +205,20 @@ function formatDate(d: string) {
       </template>
       <template #footer>
         <div class="flex justify-end gap-2">
-          <UButton color="neutral" variant="ghost" @click="showModal = false; newDomain = ''">Cancel</UButton>
-          <UButton :loading="creating" :disabled="!newDomain.trim()" @click="handleCreate">Add domain</UButton>
+          <UButton
+            color="neutral"
+            variant="ghost"
+            @click="showModal = false; newDomain = ''"
+          >
+            Cancel
+          </UButton>
+          <UButton
+            :loading="creating"
+            :disabled="!newDomain.trim()"
+            @click="handleCreate"
+          >
+            Add domain
+          </UButton>
         </div>
       </template>
     </UModal>

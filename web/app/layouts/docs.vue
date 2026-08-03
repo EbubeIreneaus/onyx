@@ -8,16 +8,16 @@ const docSections = [
     title: 'Overview',
     items: [
       { label: 'Getting Started', icon: 'i-lucide-rocket', to: '/docs/get-started' },
-      { label: 'Authentication', icon: 'i-lucide-key', to: '/docs/authentication' },
-    ],
+      { label: 'Authentication', icon: 'i-lucide-key', to: '/docs/authentication' }
+    ]
   },
   {
     title: 'API Reference',
     items: [
       { label: 'Domains API', icon: 'i-lucide-globe', to: '/docs/domains' },
-      { label: 'Redirects & Links API', icon: 'i-lucide-link', to: '/docs/redirects' },
-    ],
-  },
+      { label: 'Redirects & Links API', icon: 'i-lucide-link', to: '/docs/redirects' }
+    ]
+  }
 ]
 
 const isActive = (to: string) => route.path === to
@@ -48,10 +48,21 @@ watch(() => route.path, () => {
         </div>
 
         <div class="flex items-center gap-3">
-          <UButton to="/dashboard" color="neutral" variant="soft" size="sm" class="hidden sm:flex">
+          <UButton
+            to="/dashboard"
+            color="neutral"
+            variant="soft"
+            size="sm"
+            class="hidden sm:flex"
+          >
             Dashboard
           </UButton>
-          <UButton to="/dashboard/developer" color="primary" size="sm" icon="i-lucide-code-2">
+          <UButton
+            to="/dashboard/developer"
+            color="primary"
+            size="sm"
+            icon="i-lucide-code-2"
+          >
             Get API Key
           </UButton>
         </div>
@@ -71,7 +82,11 @@ watch(() => route.path, () => {
         :class="isMobileOpen ? 'translate-x-0' : '-translate-x-full'"
       >
         <nav class="space-y-6">
-          <div v-for="section in docSections" :key="section.title" class="space-y-2">
+          <div
+            v-for="section in docSections"
+            :key="section.title"
+            class="space-y-2"
+          >
             <p class="text-[11px] font-bold uppercase tracking-wider text-zinc-500 px-3">
               {{ section.title }}
             </p>
@@ -84,7 +99,10 @@ watch(() => route.path, () => {
                 ? 'bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20'
                 : 'text-zinc-400 hover:text-white hover:bg-zinc-900'"
             >
-              <UIcon :name="item.icon" class="w-4.5 h-4.5 shrink-0" />
+              <UIcon
+                :name="item.icon"
+                class="w-4.5 h-4.5 shrink-0"
+              />
               {{ item.label }}
             </NuxtLink>
           </div>
@@ -96,7 +114,11 @@ watch(() => route.path, () => {
         <!-- Desktop Fixed Left Sidebar -->
         <aside class="w-64 shrink-0 border-r border-zinc-800/80 p-6 hidden md:block sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
           <nav class="space-y-6">
-            <div v-for="section in docSections" :key="section.title" class="space-y-1">
+            <div
+              v-for="section in docSections"
+              :key="section.title"
+              class="space-y-1"
+            >
               <p class="text-[11px] font-bold uppercase tracking-wider text-zinc-500 mb-2 px-3">
                 {{ section.title }}
               </p>
@@ -109,7 +131,10 @@ watch(() => route.path, () => {
                   ? 'bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20'
                   : 'text-zinc-400 hover:text-white hover:bg-zinc-900'"
               >
-                <UIcon :name="item.icon" class="w-4 h-4 shrink-0" />
+                <UIcon
+                  :name="item.icon"
+                  class="w-4 h-4 shrink-0"
+                />
                 {{ item.label }}
               </NuxtLink>
             </div>

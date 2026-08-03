@@ -4,7 +4,7 @@ const { user, isAuthenticated, signout } = useAuth()
 const navLinks = [
   { label: 'Features', to: '/#features' },
   { label: 'Pricing', to: '/#pricing' },
-  { label: 'FAQ', to: '/#faq' },
+  { label: 'FAQ', to: '/#faq' }
 ]
 
 const isScrolled = ref(false)
@@ -43,26 +43,46 @@ onMounted(() => {
 
           <!-- Right actions -->
           <div class="flex items-center gap-2">
-            <UColorModeButton size="sm" color="neutral" variant="ghost" />
+            <UColorModeButton
+              size="sm"
+              color="neutral"
+              variant="ghost"
+            />
 
             <template v-if="isAuthenticated">
               <NuxtLink to="/dashboard">
-                <UButton size="sm" variant="soft" color="primary">
+                <UButton
+                  size="sm"
+                  variant="soft"
+                  color="primary"
+                >
                   Dashboard
                 </UButton>
               </NuxtLink>
-              <UButton size="sm" color="neutral" variant="ghost" @click="signout">
+              <UButton
+                size="sm"
+                color="neutral"
+                variant="ghost"
+                @click="signout"
+              >
                 Sign out
               </UButton>
             </template>
             <template v-else>
               <NuxtLink to="/login">
-                <UButton size="sm" color="neutral" variant="ghost">
+                <UButton
+                  size="sm"
+                  color="neutral"
+                  variant="ghost"
+                >
                   Sign in
                 </UButton>
               </NuxtLink>
               <NuxtLink to="/signup">
-                <UButton size="sm" color="primary">
+                <UButton
+                  size="sm"
+                  color="primary"
+                >
                   Get started free
                 </UButton>
               </NuxtLink>
@@ -88,20 +108,36 @@ onMounted(() => {
             </p>
           </div>
           <div>
-            <h4 class="text-sm font-semibold text-slate-900 dark:text-white mb-3">Product</h4>
+            <h4 class="text-sm font-semibold text-slate-900 dark:text-white mb-3">
+              Product
+            </h4>
             <ul class="space-y-2">
-              <li v-for="link in [['Features', '/#features'], ['Pricing', '/#pricing'], ['Dashboard', '/dashboard']]" :key="link[0]">
-                <NuxtLink :to="link[1]" class="text-sm text-slate-500 hover:text-zinc-600 dark:text-slate-400 dark:hover:text-zinc-400 transition-colors">
+              <li
+                v-for="link in [['Features', '/#features'], ['Pricing', '/#pricing'], ['Dashboard', '/dashboard']]"
+                :key="link[0]"
+              >
+                <NuxtLink
+                  :to="link[1]"
+                  class="text-sm text-slate-500 hover:text-zinc-600 dark:text-slate-400 dark:hover:text-zinc-400 transition-colors"
+                >
                   {{ link[0] }}
                 </NuxtLink>
               </li>
             </ul>
           </div>
           <div>
-            <h4 class="text-sm font-semibold text-slate-900 dark:text-white mb-3">Legal</h4>
+            <h4 class="text-sm font-semibold text-slate-900 dark:text-white mb-3">
+              Legal
+            </h4>
             <ul class="space-y-2">
-              <li v-for="link in [['Privacy Policy', '/privacy'], ['Terms of Service', '/terms']]" :key="link[0]">
-                <NuxtLink :to="link[1]" class="text-sm text-slate-500 hover:text-zinc-600 dark:text-slate-400 dark:hover:text-zinc-400 transition-colors">
+              <li
+                v-for="link in [['Privacy Policy', '/privacy'], ['Terms of Service', '/terms']]"
+                :key="link[0]"
+              >
+                <NuxtLink
+                  :to="link[1]"
+                  class="text-sm text-slate-500 hover:text-zinc-600 dark:text-slate-400 dark:hover:text-zinc-400 transition-colors"
+                >
                   {{ link[0] }}
                 </NuxtLink>
               </li>

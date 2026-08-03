@@ -19,7 +19,7 @@ const slug = computed(() => {
 onMounted(async () => {
   const fullUrl = window.location.href
   const domain = window.location.host
-  
+
   try {
     const res = await $fetch<{
       found: boolean
@@ -32,8 +32,8 @@ onMounted(async () => {
       body: {
         domain,
         slug: slug.value,
-        full_url: fullUrl,
-      },
+        full_url: fullUrl
+      }
     })
 
     if (res.found && res.destination) {
@@ -46,8 +46,7 @@ onMounted(async () => {
     }
     errorMsg.value = res.message || 'Link not found or has been deactivated.'
     loading.value = false
-  }
-  catch (err: any) {
+  } catch (err: any) {
     errorMsg.value = 'Failed to resolve link destination.'
     loading.value = false
   }
@@ -57,18 +56,33 @@ onMounted(async () => {
 <template>
   <div class="min-h-screen flex items-center justify-center bg-zinc-950 text-white p-6 font-sans">
     <!-- Redirecting loader -->
-    <div v-if="loading" class="text-center space-y-4">
+    <div
+      v-if="loading"
+      class="text-center space-y-4"
+    >
       <AppLogo />
       <div class="flex items-center justify-center gap-2 text-sm text-zinc-400">
-        <UIcon name="i-lucide-loader-2" class="w-4 h-4 animate-spin text-zinc-400" />
+        <UIcon
+          name="i-lucide-loader-2"
+          class="w-4 h-4 animate-spin text-zinc-400"
+        />
         <span>Redirecting you to destination...</span>
       </div>
     </div>
 
     <!-- Link Expired or Not Found -->
-    <div v-else class="max-w-md w-full text-center space-y-6 bg-zinc-900 border border-zinc-800 p-8 rounded-2xl shadow-xl">
-      <div class="inline-flex p-4 rounded-full" :class="expired ? 'bg-amber-500/10 text-amber-400' : 'bg-rose-500/10 text-rose-400'">
-        <UIcon :name="expired ? 'i-lucide-clock' : 'i-lucide-link-2-off'" class="w-10 h-10" />
+    <div
+      v-else
+      class="max-w-md w-full text-center space-y-6 bg-zinc-900 border border-zinc-800 p-8 rounded-2xl shadow-xl"
+    >
+      <div
+        class="inline-flex p-4 rounded-full"
+        :class="expired ? 'bg-amber-500/10 text-amber-400' : 'bg-rose-500/10 text-rose-400'"
+      >
+        <UIcon
+          :name="expired ? 'i-lucide-clock' : 'i-lucide-link-2-off'"
+          class="w-10 h-10"
+        />
       </div>
 
       <div>
@@ -81,7 +95,12 @@ onMounted(async () => {
       </div>
 
       <div class="pt-2">
-        <UButton to="/" color="neutral" variant="soft" size="md">
+        <UButton
+          to="/"
+          color="neutral"
+          variant="soft"
+          size="md"
+        >
           Return to Homepage
         </UButton>
       </div>

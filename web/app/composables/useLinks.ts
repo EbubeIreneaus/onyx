@@ -75,15 +75,13 @@ export const useLinks = () => {
     pending.value = true
     try {
       const res = await api<RedirectOut[]>('/api/v1/client/redirects', {
-        cache: 'no-store',
+        cache: 'no-store'
       })
       links.value = res
-    }
-    catch (err: any) {
+    } catch (err: any) {
       const msg = err?.data?.detail || 'Failed to load links.'
       toast.add({ title: 'Error', description: msg, color: 'error' })
-    }
-    finally {
+    } finally {
       pending.value = false
     }
   }
@@ -92,8 +90,7 @@ export const useLinks = () => {
   const fetchAnalytics = async (redirectId: string, period = 'daily'): Promise<RedirectAnalyticsResponse | null> => {
     try {
       return await api<RedirectAnalyticsResponse>(`/api/v1/client/redirects/${redirectId}/analytics?period=${period}`)
-    }
-    catch (err: any) {
+    } catch (err: any) {
       const msg = err?.data?.detail || 'Failed to fetch link analytics.'
       toast.add({ title: 'Error', description: msg, color: 'error' })
       return null
@@ -106,18 +103,16 @@ export const useLinks = () => {
     try {
       const res = await api<RedirectOut>('/api/v1/client/create-short', {
         method: 'POST',
-        body,
+        body
       })
       links.value.unshift(res)
       toast.add({ title: 'Link created!', description: `/${res.slug}`, color: 'success' })
       return res
-    }
-    catch (err: any) {
+    } catch (err: any) {
       const msg = err?.data?.detail || 'Failed to create link.'
       toast.add({ title: 'Error', description: msg, color: 'error' })
       return null
-    }
-    finally {
+    } finally {
       creating.value = false
     }
   }
@@ -128,8 +123,7 @@ export const useLinks = () => {
       await api(`/api/v1/client/redirects/${redirectId}`, { method: 'DELETE' })
       links.value = links.value.filter(l => l.redirect_id !== redirectId)
       toast.add({ title: 'Link deleted', color: 'success' })
-    }
-    catch (err: any) {
+    } catch (err: any) {
       toast.add({ title: 'Error', description: err?.data?.detail || 'Failed to delete.', color: 'error' })
     }
   }
@@ -156,6 +150,6 @@ export const useLinks = () => {
     fetchAnalytics,
     createLink,
     deleteLink,
-    copyLink,
+    copyLink
   }
 }

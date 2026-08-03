@@ -10,7 +10,7 @@ const navItems = [
   { label: 'Links', icon: 'i-lucide-link', to: '/dashboard/links' },
   { label: 'Domains', icon: 'i-lucide-globe', to: '/dashboard/domains' },
   { label: 'Developer API', icon: 'i-lucide-code-2', to: '/dashboard/developer' },
-  { label: 'Settings', icon: 'i-lucide-settings', to: '/dashboard/settings' },
+  { label: 'Settings', icon: 'i-lucide-settings', to: '/dashboard/settings' }
 ]
 
 const isActive = (to: string) => {
@@ -25,15 +25,23 @@ watch(() => route.path, () => { isMobileOpen.value = false })
 <template>
   <UApp>
     <!-- Full-screen loading fallback while auth session resolves -->
-    <div v-if="!user" class="min-h-screen flex items-center justify-center bg-zinc-950 text-white">
+    <div
+      v-if="!user"
+      class="min-h-screen flex items-center justify-center bg-zinc-950 text-white"
+    >
       <div class="flex flex-col items-center gap-3">
         <AppLogo />
-        <UIcon name="i-lucide-loader-2" class="w-5 h-5 animate-spin text-zinc-500 mt-1" />
+        <UIcon
+          name="i-lucide-loader-2"
+          class="w-5 h-5 animate-spin text-zinc-500 mt-1"
+        />
       </div>
     </div>
 
-    <div v-else class="min-h-screen flex bg-slate-50 dark:bg-slate-950">
-
+    <div
+      v-else
+      class="min-h-screen flex bg-slate-50 dark:bg-slate-950"
+    >
       <!-- ── Sidebar ─────────────────────────────────────── -->
       <!-- Mobile overlay -->
       <Transition name="fade">
@@ -81,10 +89,16 @@ watch(() => route.path, () => { isMobileOpen.value = false })
         <!-- Bottom: user profile + signout -->
         <div class="shrink-0 p-3 border-t border-zinc-200 dark:border-zinc-800">
           <!-- Subscription badge -->
-          <NuxtLink to="/dashboard/settings" class="block mb-2 px-3 py-2 rounded-md bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/60 hover:bg-zinc-200 dark:hover:bg-zinc-700/80 transition-colors">
+          <NuxtLink
+            to="/dashboard/settings"
+            class="block mb-2 px-3 py-2 rounded-md bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/60 hover:bg-zinc-200 dark:hover:bg-zinc-700/80 transition-colors"
+          >
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <UIcon name="i-lucide-zap" class="w-4 h-4 text-amber-500" />
+                <UIcon
+                  name="i-lucide-zap"
+                  class="w-4 h-4 text-amber-500"
+                />
                 <span class="text-xs font-semibold text-zinc-800 dark:text-zinc-200 uppercase tracking-wide">
                   {{ user?.current_subscription?.tier?.name || 'No Plan' }}
                 </span>
@@ -95,7 +109,10 @@ watch(() => route.path, () => { isMobileOpen.value = false })
 
           <!-- User row -->
           <div class="flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
-            <NuxtLink to="/dashboard/settings" class="flex items-center gap-3 flex-1 min-w-0 pr-2">
+            <NuxtLink
+              to="/dashboard/settings"
+              class="flex items-center gap-3 flex-1 min-w-0 pr-2"
+            >
               <UAvatar
                 :alt="user?.fullname || 'User'"
                 size="sm"
@@ -121,7 +138,6 @@ watch(() => route.path, () => { isMobileOpen.value = false })
 
       <!-- ── Main content ────────────────────────────────── -->
       <div class="flex-1 flex flex-col lg:ml-64 min-h-screen bg-zinc-50/50 dark:bg-zinc-950">
-
         <!-- Top bar -->
         <header class="sticky top-0 z-20 h-16 flex items-center justify-between px-4 sm:px-6 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800 shrink-0">
           <!-- Mobile menu toggle -->
@@ -139,7 +155,11 @@ watch(() => route.path, () => { isMobileOpen.value = false })
 
           <!-- Right controls -->
           <div class="flex items-center gap-2">
-            <UColorModeButton size="sm" color="neutral" variant="ghost" />
+            <UColorModeButton
+              size="sm"
+              color="neutral"
+              variant="ghost"
+            />
             <UButton
               to="/dashboard/links"
               icon="i-lucide-plus"

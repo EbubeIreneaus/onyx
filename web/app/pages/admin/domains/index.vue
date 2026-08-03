@@ -1,11 +1,11 @@
 <script setup lang="ts">
 definePageMeta({
   layout: 'admin',
-  middleware: ['auth'],
+  middleware: ['auth']
 })
 
 useSeoMeta({
-  title: 'Manage Domains — Admin',
+  title: 'Manage Domains — Admin'
 })
 
 const api = useApi()
@@ -13,7 +13,7 @@ const toast = useToast()
 
 interface AdminDomain {
   id: number
-  name: str
+  name: string
   user_email: string
   txt_verified: boolean
   cname_verified: boolean
@@ -30,11 +30,9 @@ const fetchDomains = async () => {
   try {
     const params = searchQuery.value ? `?search=${encodeURIComponent(searchQuery.value)}` : ''
     domains.value = await api<AdminDomain[]>(`/api/v1/admin/domains${params}`)
-  }
-  catch (err: any) {
+  } catch (err: any) {
     toast.add({ title: 'Error', description: 'Failed to load domains list', color: 'error' })
-  }
-  finally {
+  } finally {
     loading.value = false
   }
 }
@@ -46,13 +44,12 @@ onMounted(() => {
 const handleForceVerify = async (d: AdminDomain) => {
   try {
     const res = await api<{ message: string }>(`/api/v1/admin/domains/${d.id}/force-verify`, {
-      method: 'POST',
+      method: 'POST'
     })
     d.txt_verified = true
     d.cname_verified = true
     toast.add({ title: 'Domain Force-Verified', description: res.message, color: 'success' })
-  }
-  catch (err: any) {
+  } catch (err: any) {
     toast.add({ title: 'Error', description: err?.data?.detail || 'Failed to force-verify domain', color: 'error' })
   }
 }
@@ -63,8 +60,7 @@ const handleDeleteDomain = async (id: number) => {
     await api(`/api/v1/admin/domains/${id}`, { method: 'DELETE' })
     domains.value = domains.value.filter(d => d.id !== id)
     toast.add({ title: 'Domain Deleted', color: 'success' })
-  }
-  catch (err: any) {
+  } catch (err: any) {
     toast.add({ title: 'Error', description: err?.data?.detail || 'Failed to delete domain', color: 'error' })
   }
 }
@@ -76,10 +72,15 @@ const handleDeleteDomain = async (id: number) => {
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
         <h1 class="text-2xl font-extrabold text-white flex items-center gap-2">
-          <UIcon name="i-lucide-globe" class="w-6 h-6 text-cyan-400" />
+          <UIcon
+            name="i-lucide-globe"
+            class="w-6 h-6 text-cyan-400"
+          />
           Global Domain Management
         </h1>
-        <p class="text-xs text-zinc-400 mt-1">View registered custom domains and trigger instant DNS force-verification.</p>
+        <p class="text-xs text-zinc-400 mt-1">
+          View registered custom domains and trigger instant DNS force-verification.
+        </p>
       </div>
 
       <div class="flex items-center gap-3">
@@ -90,31 +91,61 @@ const handleDeleteDomain = async (id: number) => {
           class="w-64"
           @keyup.enter="fetchDomains"
         />
-        <UButton color="neutral" variant="soft" icon="i-lucide-rotate-cw" @click="fetchDomains" />
+        <UButton
+          color="neutral"
+          variant="soft"
+          icon="i-lucide-rotate-cw"
+          @click="fetchDomains"
+        />
       </div>
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="py-16 flex justify-center">
-      <UIcon name="i-lucide-loader-2" class="w-8 h-8 animate-spin text-zinc-500" />
+    <div
+      v-if="loading"
+      class="py-16 flex justify-center"
+    >
+      <UIcon
+        name="i-lucide-loader-2"
+        class="w-8 h-8 animate-spin text-zinc-500"
+      />
     </div>
 
     <!-- Domains Table -->
-    <div v-else class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-xs">
+    <div
+      v-else
+      class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-xs"
+    >
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs text-zinc-300">
           <thead class="bg-zinc-950 text-zinc-400 uppercase tracking-wider border-b border-zinc-800">
             <tr>
-              <th class="py-3.5 px-4">Domain Name</th>
-              <th class="py-3.5 px-4">Type</th>
-              <th class="py-3.5 px-4">Owner Email</th>
-              <th class="py-3.5 px-4">TXT DNS</th>
-              <th class="py-3.5 px-4">CNAME DNS</th>
-              <th class="py-3.5 px-4 text-right">Actions</th>
+              <th class="py-3.5 px-4">
+                Domain Name
+              </th>
+              <th class="py-3.5 px-4">
+                Type
+              </th>
+              <th class="py-3.5 px-4">
+                Owner Email
+              </th>
+              <th class="py-3.5 px-4">
+                TXT DNS
+              </th>
+              <th class="py-3.5 px-4">
+                CNAME DNS
+              </th>
+              <th class="py-3.5 px-4 text-right">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-zinc-800/60 font-mono">
-            <tr v-for="d in domains" :key="d.id" class="hover:bg-zinc-800/30 transition-colors">
+            <tr
+              v-for="d in domains"
+              :key="d.id"
+              class="hover:bg-zinc-800/30 transition-colors"
+            >
               <!-- Name -->
               <td class="py-4 px-4 text-white font-bold">
                 {{ d.name }}

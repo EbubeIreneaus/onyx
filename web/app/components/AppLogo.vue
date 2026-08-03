@@ -1,5 +1,9 @@
 <template>
-  <NuxtLink to="/" class="flex items-center gap-2 group" aria-label="Onyx Home">
+  <NuxtLink
+    to="/"
+    class="flex items-center gap-2 group"
+    aria-label="Onyx Home"
+  >
     <div class="relative flex items-center justify-center w-8 h-8">
       <div class="absolute inset-0 bg-zinc-600 rounded-lg rotate-45 group-hover:rotate-[55deg] transition-transform duration-300" />
       <svg

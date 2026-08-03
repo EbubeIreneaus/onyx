@@ -40,19 +40,17 @@ async function handleVerifyTxt() {
   if (!domain.value || domain.value.txt_verified) return
   verifyingTxt.value = true
   try {
-    const res = await api<{ success: boolean; txt_verified: boolean; message: string }>(`/api/v1/client/domains/${domain.value.id}/verify-dns?record_type=txt`, {
-      method: 'POST',
+    const res = await api<{ success: boolean, txt_verified: boolean, message: string }>(`/api/v1/client/domains/${domain.value.id}/verify-dns?record_type=txt`, {
+      method: 'POST'
     })
     if (res.txt_verified) {
       domain.value.txt_verified = true
       toast.add({ title: 'Verified!', description: res.message || 'TXT record verified successfully!', color: 'success' })
     }
-  }
-  catch (err: any) {
+  } catch (err: any) {
     const msg = err?.data?.detail || 'TXT record DNS check failed or not propagated yet.'
     toast.add({ title: 'Verification Pending', description: msg, color: 'error' })
-  }
-  finally {
+  } finally {
     verifyingTxt.value = false
   }
 }
@@ -61,19 +59,17 @@ async function handleVerifyCname() {
   if (!domain.value || domain.value.cname_verified) return
   verifyingCname.value = true
   try {
-    const res = await api<{ success: boolean; cname_verified: boolean; message: string }>(`/api/v1/client/domains/${domain.value.id}/verify-dns?record_type=cname`, {
-      method: 'POST',
+    const res = await api<{ success: boolean, cname_verified: boolean, message: string }>(`/api/v1/client/domains/${domain.value.id}/verify-dns?record_type=cname`, {
+      method: 'POST'
     })
     if (res.cname_verified) {
       domain.value.cname_verified = true
       toast.add({ title: 'Verified!', description: res.message || 'CNAME record verified successfully!', color: 'success' })
     }
-  }
-  catch (err: any) {
+  } catch (err: any) {
     const msg = err?.data?.detail || 'CNAME record DNS check failed or not propagated yet.'
     toast.add({ title: 'Verification Pending', description: msg, color: 'error' })
-  }
-  finally {
+  } finally {
     verifyingCname.value = false
   }
 }
@@ -102,24 +98,44 @@ useSeoMeta({ title: computed(() => domain.value ? `${domain.value.name} — Veri
     </div>
 
     <!-- Loading -->
-    <div v-if="loading" class="py-16 flex justify-center">
-      <UIcon name="i-lucide-loader-2" class="w-8 h-8 animate-spin text-zinc-500" />
+    <div
+      v-if="loading"
+      class="py-16 flex justify-center"
+    >
+      <UIcon
+        name="i-lucide-loader-2"
+        class="w-8 h-8 animate-spin text-zinc-500"
+      />
     </div>
 
     <!-- Not found -->
-    <div v-else-if="!domain" class="py-16 text-center">
-      <p class="text-lg font-semibold text-slate-900 dark:text-white mb-2">Domain not found</p>
-      <p class="text-sm text-slate-500 mb-4">The requested domain does not exist or you do not have permission to view it.</p>
-      <UButton to="/dashboard/domains">Return to Domains</UButton>
+    <div
+      v-else-if="!domain"
+      class="py-16 text-center"
+    >
+      <p class="text-lg font-semibold text-slate-900 dark:text-white mb-2">
+        Domain not found
+      </p>
+      <p class="text-sm text-slate-500 mb-4">
+        The requested domain does not exist or you do not have permission to view it.
+      </p>
+      <UButton to="/dashboard/domains">
+        Return to Domains
+      </UButton>
     </div>
 
     <!-- Domain Content -->
-    <div v-else class="max-w-3xl space-y-6">
+    <div
+      v-else
+      class="max-w-3xl space-y-6"
+    >
       <!-- Domain Header Card -->
       <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <div class="flex items-center gap-3 mb-1">
-            <h1 class="text-xl font-bold text-slate-900 dark:text-white">{{ domain.name }}</h1>
+            <h1 class="text-xl font-bold text-slate-900 dark:text-white">
+              {{ domain.name }}
+            </h1>
             <UBadge
               :color="domain.txt_verified && domain.cname_verified ? 'success' : 'warning'"
               variant="soft"
@@ -128,7 +144,9 @@ useSeoMeta({ title: computed(() => domain.value ? `${domain.value.name} — Veri
               {{ domain.txt_verified && domain.cname_verified ? 'Fully Verified' : 'Pending Verification' }}
             </UBadge>
           </div>
-          <p class="text-xs text-slate-400">Added on {{ formatDate(domain.created_at) }}</p>
+          <p class="text-xs text-slate-400">
+            Added on {{ formatDate(domain.created_at) }}
+          </p>
         </div>
 
         <UButton
@@ -157,7 +175,9 @@ useSeoMeta({ title: computed(() => domain.value ? `${domain.value.name} — Veri
               :class="domain.txt_verified ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'"
             />
             <div>
-              <h2 class="text-base font-semibold">1. TXT Record Verification</h2>
+              <h2 class="text-base font-semibold">
+                1. TXT Record Verification
+              </h2>
               <p class="text-xs mt-1 leading-relaxed opacity-90">
                 {{ domain.txt_verified
                   ? 'TXT record is verified! Domain ownership confirmed.'
@@ -203,7 +223,10 @@ useSeoMeta({ title: computed(() => domain.value ? `${domain.value.name} — Veri
             @click="handleVerifyTxt"
           >
             <template #leading>
-              <UIcon :name="domain.txt_verified ? 'i-lucide-check' : 'i-lucide-refresh-cw'" class="w-4 h-4" />
+              <UIcon
+                :name="domain.txt_verified ? 'i-lucide-check' : 'i-lucide-refresh-cw'"
+                class="w-4 h-4"
+              />
             </template>
             {{ domain.txt_verified ? 'TXT Record Verified' : 'Check TXT Verification' }}
           </UButton>
@@ -225,7 +248,9 @@ useSeoMeta({ title: computed(() => domain.value ? `${domain.value.name} — Veri
               :class="domain.cname_verified ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'"
             />
             <div>
-              <h2 class="text-base font-semibold">2. CNAME Destination Record</h2>
+              <h2 class="text-base font-semibold">
+                2. CNAME Destination Record
+              </h2>
               <p class="text-xs mt-1 leading-relaxed opacity-90">
                 {{ domain.cname_verified
                   ? 'CNAME record is pointing to Onyx successfully!'
@@ -271,7 +296,10 @@ useSeoMeta({ title: computed(() => domain.value ? `${domain.value.name} — Veri
             @click="handleVerifyCname"
           >
             <template #leading>
-              <UIcon :name="domain.cname_verified ? 'i-lucide-check' : 'i-lucide-refresh-cw'" class="w-4 h-4" />
+              <UIcon
+                :name="domain.cname_verified ? 'i-lucide-check' : 'i-lucide-refresh-cw'"
+                class="w-4 h-4"
+              />
             </template>
             {{ domain.cname_verified ? 'CNAME Record Verified' : 'Check CNAME Verification' }}
           </UButton>
