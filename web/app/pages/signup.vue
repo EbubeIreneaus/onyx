@@ -18,6 +18,7 @@ const error = ref('')
 const route = useRoute()
 
 async function handleSubmit() {
+  console.log("submitting")
   error.value = ''
   if (state.password !== state.confirm) {
     error.value = 'Passwords do not match.'
@@ -45,6 +46,8 @@ const features = [
   'Visitor analytics included',
   'Upgrade anytime to unlock more',
 ]
+
+onMounted(() => {console.log("welcome to onyx")})
 </script>
 
 <template>
@@ -122,6 +125,7 @@ const features = [
                 icon="i-lucide-user"
                 size="lg"
                 class="w-full"
+                data-testid="fullname"
               />
             </div>
 
@@ -136,6 +140,7 @@ const features = [
                 icon="i-lucide-mail"
                 size="lg"
                 class="w-full"
+                data-testid="email"
               />
             </div>
 
@@ -150,6 +155,7 @@ const features = [
                 icon="i-lucide-lock"
                 size="lg"
                 class="w-full"
+                data-testid="password"
               />
             </div>
 
@@ -164,6 +170,7 @@ const features = [
                 icon="i-lucide-lock-keyhole"
                 size="lg"
                 class="w-full"
+                data-testid="confirm-password"
               />
             </div>
 
@@ -173,6 +180,7 @@ const features = [
               size="lg"
               :loading="loading"
               class="rounded-xl mt-2"
+              data-testid="submit-btn"
             >
               Create account
             </UButton>

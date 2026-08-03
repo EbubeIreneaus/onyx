@@ -1,84 +1,112 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page } from "@playwright/test";
 
-test('signup and login flow works', async ({ page }) => {
-  const email = `playwright-${Date.now()}@example.com`
+const API_HOSTS = ["http://localhost:8000", "http://127.0.0.1:8000"];
 
-  await page.route('**/api/v1/**', async (route) => {
-    const request = route.request()
-    const url = request.url()
-    const origin = request.headers()['origin'] || 'http://127.0.0.1:3000'
+async function mockApiRoutes(page: Page, email: string) {
+  let isLoggedIn = false
 
-    const corsHeaders = {
-      'access-control-allow-origin': origin,
-      'access-control-allow-credentials': 'true',
-      'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'access-control-allow-headers': 'Content-Type, Authorization, Cookie',
-    }
+  const corsHeaders = {
+    'access-control-allow-origin': 'http://localhost:3000',
+    'access-control-allow-credentials': 'true',
+    'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'access-control-allow-headers': 'Content-Type, Authorization, Cookie',
+  }
 
-    if (request.method() === 'OPTIONS') {
-      return route.fulfill({
-        status: 204,
-        headers: corsHeaders,
-      })
-    }
+  const mockUser = {
+    id: 1,
+    user_id: 'usr_test',
+    fullname: 'Playwright User',
+    email,
+    status: 'active',
+    email_verified: true,
+    created_at: new Date().toISOString(),
+    current_subscription: null,
+  }
 
-    if (url.includes('/api/v1/auth/signup') || url.includes('/api/v1/auth/signin')) {
+  for (const host of API_HOSTS) {
+    await page.route(`${host}/**`, async (route) => {
+      const url = route.request().url()
+      const method = route.request().method()
+
+      if (method === 'OPTIONS') {
+        return route.fulfill({ status: 204, headers: corsHeaders })
+      }
+      if (url.includes('/api/v1/auth/signup') || url.includes('/api/v1/auth/signin')) {
+        isLoggedIn = true
+        return route.fulfill({
+          status: 200,
+          headers: corsHeaders,
+          contentType: 'application/json',
+          body: JSON.stringify({ success: true }),
+        })
+      }
+      if (url.includes('/api/v1/auth/me') || url.includes('/api/v1/auth/refresh-token')) {
+        if (!isLoggedIn) {
+          return route.fulfill({
+            status: 401,
+            headers: corsHeaders,
+            contentType: 'application/json',
+            body: JSON.stringify({ detail: 'Unauthenticated' }),
+          })
+        }
+        return route.fulfill({
+          status: 200,
+          headers: corsHeaders,
+          contentType: 'application/json',
+          body: JSON.stringify(url.includes('/refresh-token') ? { success: true } : mockUser),
+        })
+      }
       return route.fulfill({
         status: 200,
         headers: corsHeaders,
         contentType: 'application/json',
-        body: JSON.stringify({ success: true }),
+        body: JSON.stringify([]),
       })
-    }
-
-    if (url.includes('/api/v1/auth/me')) {
-      return route.fulfill({
-        status: 200,
-        headers: corsHeaders,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 1,
-          user_id: 'usr_test',
-          fullname: 'Playwright User',
-          email,
-          status: 'active',
-          email_verified: true,
-          created_at: new Date().toISOString(),
-          current_subscription: null,
-        }),
-      })
-    }
-
-    return route.fulfill({
-      status: 200,
-      headers: corsHeaders,
-      contentType: 'application/json',
-      body: JSON.stringify([]),
     })
-  })
+  }
+}
 
-  // 1. Signup Flow
-  await page.goto('/signup')
-  await page.getByPlaceholder('Jane Doe').fill('Playwright User')
-  await page.getByPlaceholder('you@example.com').fill(email)
-  await page.getByPlaceholder('At least 8 characters').fill('StrongPass123')
-  await page.getByPlaceholder('Repeat your password').fill('StrongPass123')
+async function typeInto(page: Page, placeholder: string, value: string) {
+  const input = page.getByPlaceholder(placeholder);
+  await input.click();
+  await input.pressSequentially(value, { delay: 30 });
+}
 
-  await page.locator('form').evaluate((form: HTMLFormElement) => {
-    form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))
-  })
+test("signup flow works", async ({ page }) => {
 
-  await expect(page).toHaveURL(/\/dashboard/, { timeout: 15000 })
+  await page.context().clearCookies()
 
-  // 2. Login Flow
-  await page.goto('/login')
-  await page.getByPlaceholder('you@example.com').fill(email)
-  await page.getByPlaceholder('••••••••').fill('StrongPass123')
+  const email = `playwright-${Date.now()}@example.com`;
+  await mockApiRoutes(page, email)
 
-  await page.locator('form').evaluate((form: HTMLFormElement) => {
-    form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))
-  })
+  await page.goto("http://localhost:3000/signup");
 
-  await expect(page).toHaveURL(/\/dashboard/, { timeout: 15000 })
-})
+  await page.waitForLoadState('networkidle')
 
+  await page.getByTestId("fullname").fill("Playwright User");
+  await page.getByTestId("email").fill(email);
+  await page.getByTestId("password").fill("StrongPass123");
+  await page.getByTestId("confirm-password").fill("StrongPass123");
+
+  // User added test-id="submit-btn" to the UButton — use it for reliable clicking
+  await page.getByTestId("submit-btn").click();
+
+  await expect(page).toHaveURL("http://localhost:3000/dashboard");
+});
+
+test("login flow works", async ({ page }) => {
+  const email = `playwright-${Date.now()}@example.com`;
+  await mockApiRoutes(page, email)
+
+  await page.goto("/login");
+
+  await page.waitForLoadState('networkidle')
+
+  await page.getByTestId("email").fill(email)
+  await page.getByTestId("password").fill("StrongPass123")
+
+  await page.getByTestId("submit-btn").click();
+
+  await page.waitForURL(/\/dashboard/, { timeout: 15000 });
+  await expect(page).toHaveURL(/\/dashboard/);
+});

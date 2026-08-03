@@ -54,10 +54,10 @@ async function handleSubmit() {
             "Onyx transformed how we share content. Our branded links get 40% more clicks."
           </blockquote>
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-white font-bold">A</div>
+            <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-white font-bold">E</div>
             <div>
-              <p class="text-white font-semibold">Adebayo Seun</p>
-              <p class="text-zinc-300 text-sm">Founder, GrowthHQ</p>
+              <p class="text-white font-semibold">Ebube Ireneaus</p>
+              <p class="text-zinc-300 text-sm">Founder, 16vmart</p>
             </div>
           </div>
 
@@ -110,6 +110,7 @@ async function handleSubmit() {
                 icon="i-lucide-mail"
                 size="lg"
                 class="w-full"
+                data-testid="email"
               />
             </div>
 
@@ -129,6 +130,7 @@ async function handleSubmit() {
                 icon="i-lucide-lock"
                 size="lg"
                 class="w-full"
+                data-testid="password"
               />
             </div>
 
@@ -138,6 +140,7 @@ async function handleSubmit() {
               size="lg"
               :loading="loading"
               class="rounded-xl mt-2"
+              data-testid="submit-btn"
             >
               Sign in
             </UButton>

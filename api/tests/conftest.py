@@ -11,12 +11,13 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+os.environ.setdefault("DB_URL", "sqlite+aiosqlite:///:memory:")
 os.environ.setdefault("JWT_SECRET", "test-jwt-secret")
 os.environ.setdefault("JWT_ALGORITHM", "HS256")
 os.environ.setdefault("DOMAIN_NAME", "localhost:3000")
 os.environ.setdefault("REDIS_URL", "redis://localhost:6379")
 os.environ.setdefault("ONYX_ADMIN_EMAIL", "admin@onyx.com")
-os.environ.setdefault("ONYX_ADMIN_PASS", "178420443")
+os.environ.setdefault("ONYX_ADMIN_PASS", "123456789")
 os.environ.setdefault("PAYSTACK_SECRET", "test")
 os.environ.setdefault("PAYSTACK_PUBLIC", "test")
 os.environ.setdefault("MAIL_USER", "test@example.com")
