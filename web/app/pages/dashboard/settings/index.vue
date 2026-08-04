@@ -1,7 +1,14 @@
 <script setup lang="ts">
+import { availablePermissions } from '~/libs/permission'
+
 definePageMeta({ layout: 'dashboard', middleware: 'auth' })
 
 useSeoMeta({ title: 'Settings — Onyx' })
+
+function hasPermission(tierObj: any, permValue: string): boolean {
+  if (!tierObj?.permissions || !Array.isArray(tierObj.permissions)) return false
+  return tierObj.permissions.includes(permValue)
+}
 
 const { user, fetchMe } = useAuth()
 const api = useApi()
@@ -296,27 +303,25 @@ onMounted(async () => {
               {{ t.description }}
             </p>
 
-            <ul class="space-y-2 text-xs text-slate-600 dark:text-slate-300 mb-6">
-              <li class="flex items-center gap-2">
+            <ul class="space-y-2.5 text-xs text-slate-600 dark:text-slate-300 mb-6 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <li
+                v-for="perm in availablePermissions"
+                :key="perm.value"
+                class="flex items-center gap-2"
+              >
                 <UIcon
+                  v-if="hasPermission(t, perm.value)"
                   name="i-lucide-check"
-                  class="w-4 h-4 text-emerald-500 shrink-0"
+                  class="w-4 h-4 shrink-0 text-emerald-500"
                 />
-                <span>{{ t.max_short_link }} Short Links</span>
-              </li>
-              <li class="flex items-center gap-2">
                 <UIcon
-                  name="i-lucide-check"
-                  class="w-4 h-4 text-emerald-500 shrink-0"
+                  v-else
+                  name="i-lucide-minus"
+                  class="w-4 h-4 shrink-0 text-zinc-400 dark:text-zinc-600"
                 />
-                <span>{{ t.max_custom_domains }} Custom Domains</span>
-              </li>
-              <li class="flex items-center gap-2">
-                <UIcon
-                  name="i-lucide-check"
-                  class="w-4 h-4 text-emerald-500 shrink-0"
-                />
-                <span>{{ t.max_onyx_subdomains }} Subdomains</span>
+                <span :class="hasPermission(t, perm.value) ? 'text-slate-700 dark:text-slate-300 font-medium' : 'text-slate-400 dark:text-slate-600 opacity-70'">
+                  {{ perm.label }}
+                </span>
               </li>
             </ul>
           </div>

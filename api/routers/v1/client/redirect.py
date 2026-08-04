@@ -167,7 +167,7 @@ async def create_short_link(
     )
 
     db.add(new_redirect)
-    await db.flush()
+    await db.commit()
     await db.refresh(new_redirect)
 
     if can_generate_qrimage:
