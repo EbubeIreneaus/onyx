@@ -144,7 +144,7 @@ print(response.json())`
           </UTooltip>
 
           <UButton
-            to="/dashboard/subscriptions"
+            to="/dashboard/settings"
             color="warning"
             variant="solid"
             size="md"
