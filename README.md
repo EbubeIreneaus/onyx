@@ -1,4 +1,4 @@
-<parameter name="CodeContent"># Onyx — URL Intelligence & Custom Domain Management Platform
+# Onyx — URL Intelligence & Custom Domain Management Platform
 
 [![CI Pipeline](https://github.com/EbubeIreneaus/onyx/actions/workflows/ci.yml/badge.svg)](https://github.com/EbubeIreneaus/onyx/actions/workflows/ci.yml)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.141+-009688.svg?style=flat&logo=fastapi)](https://fastapi.tiangolo.com)
@@ -10,6 +10,45 @@
 [![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED.svg?style=flat&logo=docker)](https://docker.com)
 
 > A production-grade, full-stack URL management platform — featuring branded short links, custom domain routing, granular subscription tiers, QR generation, visitor analytics, and a self-healing caching layer. Engineered to demonstrate real-world system design, performance thinking, and end-to-end engineering ownership.
+
+---
+
+## 🌐 Live Demo
+
+> **Coming soon** — deployment in progress. Link will be added here.
+
+---
+
+## 📸 Application Preview
+
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <strong>Landing Page</strong><br/>
+      <img src="docs/screenshots/homepage.png" alt="Onyx landing page — Links that work smarter" width="100%"/>
+    </td>
+    <td align="center" width="50%">
+      <strong>User Dashboard</strong><br/>
+      <img src="docs/screenshots/dashboard.png" alt="Onyx dashboard — active links, total clicks, domain and subscription overview" width="100%"/>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <strong>Link Analytics</strong><br/>
+      <img src="docs/screenshots/analytics.png" alt="Per-link analytics — total clicks, unique visitors, top location, top device, click traffic over time" width="100%"/>
+    </td>
+    <td align="center" width="50%">
+      <strong>Subscription Management</strong><br/>
+      <img src="docs/screenshots/settings.png" alt="Settings — current subscription plan, available tiers, upgrade via Paystack" width="100%"/>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" colspan="2">
+      <strong>Developer API</strong><br/>
+      <img src="docs/screenshots/api.png" alt="Developer API — generate API tokens, quickstart cURL and SDK integration snippets" width="50%"/>
+    </td>
+  </tr>
+</table>
 
 ---
 
@@ -145,6 +184,7 @@ cd web && pnpm run test:e2e
 ```
 onyx/
 ├── .github/workflows/     # CI pipeline definitions
+├── docs/screenshots/      # Application screenshots
 ├── api/
 │   ├── libs/              # Shared utilities — caching, auth, route guards, permission helpers
 │   ├── models/            # SQLAlchemy ORM models
