@@ -1,4 +1,4 @@
-FROM python:3.14-slim as builder
+FROM python:3.14-slim AS builder
 
 ENV VIRTUAL_ENV=/opt/venv \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -15,7 +15,7 @@ COPY pyproject.toml README.md ./
 
 RUN pip install --upgrade pip && pip install .
 
-FROM python:3.14-slim as runner
+FROM python:3.14-slim AS runner
 
 ENV VIRTUAL_ENV=/opt/venv \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -31,4 +31,4 @@ COPY . .
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000"]
+CMD ["sh", "-c", "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port $PORT"]

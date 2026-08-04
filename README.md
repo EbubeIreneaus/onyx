@@ -15,7 +15,7 @@
 
 ## 🌐 Live Demo
 
-> **Coming soon** — deployment in progress. Link will be added here.
+> **Live** — (https://onyx.name.ng)
 
 ---
 

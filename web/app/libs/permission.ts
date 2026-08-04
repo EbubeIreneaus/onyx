@@ -5,6 +5,5 @@ export const availablePermissions = [
   { label: 'Visitor Analytics', value: 'visitor:analytics' },
   { label: 'Onyx Subdomains', value: 'onyx:subdomain' },
   { label: 'Developer API Access', value: 'api:access' },
-  { label: 'Custom Domain Access', value: 'custom:domain' },
-  { label: 'SDK Access', value: 'sdk' }
+  { label: 'Custom Domain', value: 'custom:domain' }
 ]

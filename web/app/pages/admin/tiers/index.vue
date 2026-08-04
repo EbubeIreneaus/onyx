@@ -287,7 +287,7 @@ const handleDeleteTier = async (tier: AdminTier) => {
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-zinc-400 mb-1 font-bold">Price ($ USD)</label>
+              <label class="block text-zinc-400 mb-1 font-bold">Price (₦ NGN)</label>
               <UInput
                 v-model.number="form.price"
                 type="number"

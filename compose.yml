@@ -19,18 +19,18 @@ services:
         condition: service_started
     restart: unless-stopped
   
-  worker:
-    build: ./api
-    command: python -m workers.run
-    environment:
-      - REDIS_URL=redis://redis:6379/0
-      - DB_URL=postgresql+asyncpg://onyx:onyx@postgres:5432/onyx
-    env_file:
-      - ./api/.env
-    volumes:
-      - ./api:/app
-    depends_on:
-      - redis
+  # worker:
+  #   build: ./api
+  #   command: python -m workers.run
+  #   environment:
+  #     - REDIS_URL=redis://redis:6379/0
+  #     - DB_URL=postgresql+asyncpg://onyx:onyx@postgres:5432/onyx
+  #   env_file:
+  #     - ./api/.env
+  #   volumes:
+  #     - ./api:/app
+  #   depends_on:
+  #     - redis
 
   redis:
     image: redis:7-alpine
