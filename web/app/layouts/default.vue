@@ -149,7 +149,7 @@ onMounted(() => {
             © {{ new Date().getFullYear() }} Onyx. All rights reserved.
           </p>
           <p class="text-sm text-slate-400">
-            Built with ❤️ for the modern web
+            By Ebube Ireneaus ❤️
           </p>
         </div>
       </div>
