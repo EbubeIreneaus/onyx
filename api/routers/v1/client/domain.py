@@ -386,13 +386,6 @@ async def verify_domain_dns(
             domain_obj.txt_verified = True
             await db.commit()
             await db.refresh(domain_obj)
-
-            try:
-                arq = await get_arq_pool()
-                await arq.enqueue_job("add_domain_alias", domain_obj.name, _queue_name="onyx")
-            except Exception as err:
-                logger.warning(f"Failed to enqueue add_domain_alias job for domain {domain_obj.name}: {err}")
-
             return {"success": True, "txt_verified": True, "message": "TXT record verified successfully!"}
 
         except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.resolver.NoNameservers, dns.resolver.Timeout) as e:
@@ -439,6 +432,13 @@ async def verify_domain_dns(
                 domain_obj.txt_verified = True
             await db.commit()
             await db.refresh(domain_obj)
+
+            try:
+                arq = await get_arq_pool()
+                await arq.enqueue_job("add_domain_alias", domain_obj.name, _queue_name="onyx")
+            except Exception as err:
+                logger.warning(f"Failed to enqueue add_domain_alias job for domain {domain_obj.name}: {err}")
+
             return {"success": True, "cname_verified": True, "message": "CNAME record verified successfully!"}
 
         except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.resolver.NoNameservers, dns.resolver.Timeout) as e:
