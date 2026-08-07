@@ -388,14 +388,19 @@ async def delete_admin_domain(
     if not domain_obj:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Domain not found")
 
+    domain_name = domain_obj.name
     await db.delete(domain_obj)
     await db.commit()
+
+    try:
+        arq = await get_arq_pool()
+        await arq.enqueue_job("delete_domain_alias", domain_name, _queue_name="onyx")
+    except Exception as err:
+        logger.warning(f"Failed to enqueue delete_domain_alias job for domain {domain_name}: {err}")
+
     return {"success": True, "message": "Domain deleted successfully"}
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Redirects & Short Links Management
-# ─────────────────────────────────────────────────────────────────────────────
 
 @router.get("/redirects", response_model=List[AdminRedirectListItem])
 async def list_admin_redirects(

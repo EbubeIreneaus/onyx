@@ -9,9 +9,11 @@ from models.redirect import Domain as DomainModel, Redirect as RedirectModel
 from schemas.user import UserOut
 from schemas.domain import DomainCreate, DomainUpdate, DomainResponse, DomainCheckRequest, DomainCheckResponse
 from libs.deps import get_user
+from libs.logger import logger
 from libs.redis import redis
 from permission import AppPermission
 from setting import settings
+from workers.config import get_arq_pool
 from .utils import get_user_permissions_and_limits
 
 router = APIRouter()
@@ -70,6 +72,13 @@ async def create_domain(
         db.add(new_domain)
         await db.commit()
         await db.refresh(new_domain)
+
+        try:
+            arq = await get_arq_pool()
+            await arq.enqueue_job("add_domain_alias", domain_name, _queue_name="onyx")
+        except Exception as err:
+            logger.warning(f"Failed to enqueue add_domain_alias job for subdomain {domain_name}: {err}")
+
         return new_domain
     else:
         if AppPermission.CUSTOM_DOMAIN not in permissions and AppPermission.CUSTOM_DOMAIN.value not in permissions:
@@ -276,8 +285,16 @@ async def delete_domain(
     if not domain_obj:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Domain not found")
 
+    domain_name = domain_obj.name
     await db.delete(domain_obj)
     await db.commit()
+
+    try:
+        arq = await get_arq_pool()
+        await arq.enqueue_job("delete_domain_alias", domain_name, _queue_name="onyx")
+    except Exception as err:
+        logger.warning(f"Failed to enqueue delete_domain_alias job for domain {domain_name}: {err}")
+
     return {"success": True, "detail": "Domain deleted successfully"}
 
 import dns.resolver
@@ -369,6 +386,13 @@ async def verify_domain_dns(
             domain_obj.txt_verified = True
             await db.commit()
             await db.refresh(domain_obj)
+
+            try:
+                arq = await get_arq_pool()
+                await arq.enqueue_job("add_domain_alias", domain_obj.name, _queue_name="onyx")
+            except Exception as err:
+                logger.warning(f"Failed to enqueue add_domain_alias job for domain {domain_obj.name}: {err}")
+
             return {"success": True, "txt_verified": True, "message": "TXT record verified successfully!"}
 
         except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.resolver.NoNameservers, dns.resolver.Timeout) as e:
