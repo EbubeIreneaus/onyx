@@ -31,8 +31,9 @@ class Settings(BaseSettings):
     CLOUDINARY_KEY: str
     IMAGE_FOLDER: str = "16vmart"
 
-
-
+    NETLIFY_SITE_ID: str
+    NETLIFY_SECRET_TOKEN: str
+    
     class Config:
         env_file = ".env"
 
